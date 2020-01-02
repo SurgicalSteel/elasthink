@@ -15,7 +15,7 @@ We use inverted index to build the index. We also utilize redis to store the ind
 4. Everything is set, you can now build and run elasthink.
 
 ## Documentation
-API documentation (insomnia format) is available in the `elasthink_insomnia_api_documentation.json`
+API documentation (insomnia format) is available in the `elasthink_insomnia_api_documentation.json`  
 For code documentation, we use standard godoc as our code documentation tool. To view the code documentation, follow these steps :
 1. Open your terminal, head to this cloned repo (SurgicalSteel/elasthink)
 2. run `godoc -http=:6060` (this will trigger godoc at port 6060)
