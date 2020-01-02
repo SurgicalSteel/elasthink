@@ -18,6 +18,6 @@ We use inverted index to build the index. We also utilize redis to store the ind
 1. API documentation (insomnia format) is available in the `elasthink_insomnia_api_documentation.json`
 2. To view code documentation, you can visit [Elasthink's GoDoc](https://godoc.org/github.com/SurgicalSteel/elasthink)
 
-## dependencies
-1. [gorilla/mux]("https://github.com/gorilla/mux")
+## Dependencies
+1. [gorilla/mux](https://github.com/gorilla/mux)
 2. [gomodule/redigo](https://github.com/gomodule/redigo)
