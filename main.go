@@ -3,11 +3,13 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"github.com/SurgicalSteel/elasthink/config"
 	"github.com/SurgicalSteel/elasthink/entity"
 	"github.com/SurgicalSteel/elasthink/module"
 	"github.com/SurgicalSteel/elasthink/redis"
 	"github.com/SurgicalSteel/elasthink/router"
+	"github.com/SurgicalSteel/elasthink/util"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -17,10 +19,15 @@ import (
 
 const stopwordsFileName string = "files/data/stopwords.json"
 const configPath string = "files/config"
-const env string = "development"
 
 func main() {
 	log.SetOutput(os.Stdout)
+	environmentFlag := flag.String("env", "development", "specify your environment for running elasthink (development / staging / production)")
+
+	flag.Parse()
+
+	environment := util.GetEnv(*environmentFlag)
+	log.Println("Starting elasthink in environment:", environment)
 
 	//read stop words file
 	stopwordData, err := readStopwordsFile(stopwordsFileName)
@@ -30,7 +37,7 @@ func main() {
 	}
 
 	//init config
-	err = config.InitConfig(configPath, env)
+	err = config.InitConfig(configPath, environment)
 	if err != nil {
 		log.Fatalln(err)
 		return
@@ -74,6 +81,7 @@ func readStopwordsFile(fileName string) (entity.StopwordData, error) {
 		log.Println("Failed to open stopwords file. Reason :", err.Error())
 		return stopwordData, err
 	}
+	defer rawStopwordsFile.Close()
 
 	rawStopwordsBody, err := ioutil.ReadAll(rawStopwordsFile)
 	if err != nil {
