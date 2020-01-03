@@ -1,4 +1,4 @@
-package entity
+package util
 
 // Elasthink, An alternative to elasticsearch engine written in Go for small set of documents that uses inverted index to build the index and utilizes redis to store the indexes.
 // Copyright (C) 2020 Yuwono Bangun Nagoro (a.k.a SurgicalSteel)
@@ -17,3 +17,13 @@ package entity
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
+import (
+	//"fmt"
+	//"github.com/stretchr/testify/assert"
+	"testing"
+)
+
+func TestCreateWordSet(t *testing.T)        {}
+func TestWordsSetUnion(t *testing.T)        {}
+func TestWordsSetSubtraction(t *testing.T)  {}
+func TestWordsSetIntersection(t *testing.T) {}
