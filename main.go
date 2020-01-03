@@ -27,7 +27,7 @@ func main() {
 	flag.Parse()
 
 	environment := util.GetEnv(*environmentFlag)
-	log.Println("Starting elasthink in environment:", environment)
+	log.Println("Environment for elasthink:", environment)
 
 	//read stop words file
 	stopwordData, err := readStopwordsFile(stopwordsFileName)
@@ -65,7 +65,7 @@ func main() {
 		IdleTimeout:  time.Second * 60,
 		Handler:      routing.Router,
 	}
-
+	log.Println("Starting elasthink in port 9000...")
 	err = server.ListenAndServe()
 	if err != nil {
 		log.Fatal("Failed to start service! Reason :", err.Error())

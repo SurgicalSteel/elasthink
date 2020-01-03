@@ -13,7 +13,7 @@ We use inverted index to build the index. We also utilize redis to store the ind
 1. To install elasthink, you need to run `$ go get github.com/SurgicalSteel/elasthink`
 2. Then you need to specify your redis addresses for each environment in `files/config/redis` folder
 3. To start with your own document, you need to modify the document type const in `entity/document.go` and its validation function in `module/document.go`
-4. To build elasthink, run `$ go build`.
+4. To build elasthink, run `$ go build`
 5. To run elasthink, run `$ ./elasthink -env={your-environment}`
 
 ## Documentation
@@ -26,6 +26,7 @@ For code documentation, we use standard godoc as our code documentation tool. To
 ## Dependencies
 1. [gorilla/mux](https://github.com/gorilla/mux)
 2. [gomodule/redigo](https://github.com/gomodule/redigo)
+3. [gcfg.v1](https://gopkg.in/gcfg.v1)
 
 ## Reference
 [E-Book Redis in Action Part 2 Chapter 7](https://redislabs.com/ebook/part-2-core-concepts/chapter-7-search-based-applications/7-1-searching-in-redis/7-1-1-basic-search-theory/)
