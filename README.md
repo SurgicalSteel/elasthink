@@ -14,7 +14,7 @@ We use inverted index to build the index. We also utilize redis to store the ind
 2. Then you need to specify your redis addresses for each environment in `files/config/redis` folder
 3. To start with your own document, you need to modify the document type const in `entity/document.go` and its validation function in `module/document.go`
 4. To build elasthink, run `$ go build`
-5. To run elasthink, run `$ ./elasthink -env={your-environment}`
+5. To run elasthink, run `$ ./elasthink -env={your-environment}` and your elasthink web service should run on `localhost:9000` 
 
 ## Documentation
 API documentation (insomnia format) is available in the `elasthink_insomnia_api_documentation.json`  

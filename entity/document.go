@@ -23,8 +23,11 @@ import ()
 type DocumentType string
 
 const (
-	//AdvertisementCampaignDocument is the document type that represent Airy's Advertisement Campaign document type
+	//These document types below are just for example.
+	//You can create your own document type and don't forget to modify the module/document.go for document type validation.
+
+	//AdvertisementCampaignDocument is the document type that represent Advertisement Campaign document type
 	AdvertisementCampaignDocument DocumentType = "advcampaign"
-	//CampaignDocument is the document type that represent Airy's Campaign document type (coupon for promotion)
+	//CampaignDocument is the document type that represent Campaign document type (coupon for promotion)
 	CampaignDocument DocumentType = "campaign"
 )
