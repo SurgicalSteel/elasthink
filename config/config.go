@@ -1,4 +1,4 @@
-//package config is where we parse configurations from configuration files (.ini) into configuration objects
+//Package config is where we parse configurations from configuration files (.ini) into configuration objects
 package config
 
 // Elasthink, An alternative to elasticsearch engine written in Go for small set of documents that uses inverted index to build the index and utilizes redis to store the indexes.

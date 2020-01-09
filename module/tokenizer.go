@@ -23,7 +23,8 @@ import (
 	"strings"
 )
 
-func tokenizeIndonesianSearchTerm(s string) map[string]int {
+//tokenize is a tokenizer function, basically to remove punctuations and (optional) to remove stopwords to a document name or a search term
+func tokenize(s string) map[string]int {
 	s = strings.ToLower(s)
 	regex := regexp.MustCompile(`[^a-zA-Z0-9 ]`)
 	s = regex.ReplaceAllString(s, ` `)
@@ -40,5 +41,9 @@ func tokenizeIndonesianSearchTerm(s string) map[string]int {
 
 	wordsSet := util.CreateWordSet(words)
 
-	return wordsSet //util.WordsSetSubtraction(wordsSet, moduleObj.StopwordSet)
+	if moduleObj.IsUsingStopwordRemoval {
+		return util.WordsSetSubtraction(wordsSet, moduleObj.StopwordSet)
+	}
+
+	return wordsSet
 }

@@ -1,4 +1,4 @@
-//package router is the package where we define web routes on elasthink
+//Package router is the package where we define web routes on elasthink
 package router
 
 // Elasthink, An alternative to elasticsearch engine written in Go for small set of documents that uses inverted index to build the index and utilizes redis to store the indexes.

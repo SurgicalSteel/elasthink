@@ -59,7 +59,7 @@ func CreateIndex(ctx context.Context, documentID int64, documentType string, req
 		}
 	}
 
-	documentNameSet := tokenizeIndonesianSearchTerm(requestPayload.DocumentName)
+	documentNameSet := tokenize(requestPayload.DocumentName)
 
 	docType := getDocumentType(documentType)
 	errorExist := false
@@ -133,8 +133,8 @@ func UpdateIndex(ctx context.Context, documentID int64, documentType string, req
 		}
 	}
 
-	oldDocumentNameSet := tokenizeIndonesianSearchTerm(requestPayload.OldDocumentName)
-	newDocumentNameSet := tokenizeIndonesianSearchTerm(requestPayload.NewDocumentName)
+	oldDocumentNameSet := tokenize(requestPayload.OldDocumentName)
+	newDocumentNameSet := tokenize(requestPayload.NewDocumentName)
 
 	docType := getDocumentType(documentType)
 

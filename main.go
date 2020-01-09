@@ -35,17 +35,20 @@ import (
 	"time"
 )
 
-const stopwordsFileName string = "files/data/stopwords.json"
+const stopwordsFileName string = "files/data/stopwords_id.json"
 const configPath string = "files/config"
 
 func main() {
 	log.SetOutput(os.Stdout)
 	environmentFlag := flag.String("env", "development", "specify your environment for running elasthink (development / staging / production)")
+	stopwordsRemovalUsageFlag := flag.Bool("swr", false, "option to use stopwords removal during create index & update index & searching (default false)")
 
 	flag.Parse()
 
 	environment := util.GetEnv(*environmentFlag)
 	log.Println("Environment for elasthink:", environment)
+
+	isUsingStopwordsRemoval := *stopwordsRemovalUsageFlag
 
 	//read stop words file
 	stopwordData, err := readStopwordsFile(stopwordsFileName)
@@ -69,7 +72,7 @@ func main() {
 	}
 
 	//init module
-	module.InitModule(stopwordData, redisObject)
+	module.InitModule(stopwordData, redisObject, isUsingStopwordsRemoval)
 
 	routing := router.InitializeRoute()
 	routing.RegisterHandler()

@@ -63,7 +63,7 @@ func Search(ctx context.Context, documentType string, requestPayload SearchReque
 		}
 	}
 
-	searchTermSet := tokenizeIndonesianSearchTerm(requestPayload.SearchTerm)
+	searchTermSet := tokenize(requestPayload.SearchTerm)
 	if len(searchTermSet) == 0 {
 		return Response{
 			StatusCode:   http.StatusOK,

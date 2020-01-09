@@ -1,4 +1,4 @@
-//package redis is where we place all funcs related to redis operations
+//Package redis is where we place all funcs related to redis operations
 package redis
 
 // Elasthink, An alternative to elasticsearch engine written in Go for small set of documents that uses inverted index to build the index and utilizes redis to store the indexes.
