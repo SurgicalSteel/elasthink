@@ -65,11 +65,7 @@ func main() {
 	}
 
 	//init redis
-	redisObject, err := redis.InitRedis(*config.GetRedisConfig())
-	if err != nil {
-		log.Fatalln(err)
-		return
-	}
+	redisObject := redis.InitRedis(*config.GetRedisConfig())
 
 	//init module
 	module.InitModule(stopwordData, redisObject, isUsingStopwordsRemoval)

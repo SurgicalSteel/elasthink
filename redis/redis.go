@@ -38,7 +38,7 @@ type Redis struct {
 const NetworkTCP string = "tcp"
 
 //InitRedis is a func to initialize redis that we are going to use
-func InitRedis(redisConfig config.RedisConfigWrap) (*Redis, error) {
+func InitRedis(redisConfig config.RedisConfigWrap) *Redis {
 	newRedis := &Redis{
 		Pool: &redigo.Pool{
 			MaxIdle:     redisConfig.RedisElasthink.MaxIdle,
@@ -49,7 +49,7 @@ func InitRedis(redisConfig config.RedisConfigWrap) (*Redis, error) {
 			},
 		},
 	}
-	return newRedis, nil
+	return newRedis
 }
 
 // SAdd add an item into a set
