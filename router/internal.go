@@ -31,6 +31,4 @@ func (rw *RouterWrap) RegisterInternalHandler() {
 	subRouteInternalV1.HandleFunc("/index/{document_type}/{document_id}", service.HandleCreateIndex).Methods(http.MethodPost)
 	subRouteInternalV1.HandleFunc("/index/{document_type}/{document_id}", service.HandleUpdateIndex).Methods(http.MethodPut)
 
-	subRouteInternalV1.HandleFunc("/search/{document_type}", service.HandleSearch).Methods(http.MethodPost)
-
 }

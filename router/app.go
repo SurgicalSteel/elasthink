@@ -26,5 +26,5 @@ import (
 func (rw *RouterWrap) RegisterAppHandler() {
 	subRouteV1 := rw.Router.PathPrefix("/v1").Subrouter()
 
-	subRouteV1.HandleFunc("/search/{document_type}", service.HandleSearch).Methods(http.MethodPost)
+	subRouteV1.HandleFunc("/{document_type}/_search", service.HandleSearch).Methods(http.MethodPost)
 }
