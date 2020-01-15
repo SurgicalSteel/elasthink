@@ -1,6 +1,8 @@
-# elasthink
-===========
+elasthink
+=========
+
 [![GoDoc](https://godoc.org/github.com/SurgicalSteel/elasthink?status.png)](https://godoc.org/github.com/SurgicalSteel/elasthink)
+
 An alternative to elasticsearch engine written in Go for small set of documents that makes you think a little bit when implementing it.
 We use inverted index to build the index. We also utilize redis to store the indexes.
 
