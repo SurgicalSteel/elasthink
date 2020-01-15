@@ -30,6 +30,8 @@ For code documentation, we use standard godoc as our code documentation tool. To
 1. [gorilla/mux](https://github.com/gorilla/mux)
 2. [gomodule/redigo](https://github.com/gomodule/redigo)
 3. [gcfg.v1](https://gopkg.in/gcfg.v1)
+4. [stretchr/testify](https://github.com/stretchr/testify)
+5. [rafaeljusto/redigomock](https://github.com/rafaeljusto/redigomock)
 
 ## Reference
 [E-Book Redis in Action Part 2 Chapter 7](https://redislabs.com/ebook/part-2-core-concepts/chapter-7-search-based-applications/7-1-searching-in-redis/7-1-1-basic-search-theory/)
