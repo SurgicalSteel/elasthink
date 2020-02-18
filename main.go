@@ -20,6 +20,7 @@ package main
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import (
+	"context"
 	"encoding/json"
 	"flag"
 	"github.com/SurgicalSteel/elasthink/config"
@@ -32,6 +33,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 	"time"
 )
 
@@ -67,8 +70,11 @@ func main() {
 	//init redis
 	redisObject := redis.InitRedis(*config.GetRedisConfig())
 
+	//init entity data
+	entity.Entity.Initialize(stopwordData)
+
 	//init module
-	module.InitModule(stopwordData, redisObject, isUsingStopwordsRemoval)
+	module.InitModule(entity.Entity.GetStopwordData(), redisObject, isUsingStopwordsRemoval)
 
 	routing := router.InitializeRoute()
 	routing.RegisterHandler()
@@ -83,11 +89,31 @@ func main() {
 		Handler:      routing.Router,
 	}
 	log.Println("Starting elasthink in port 9000...")
-	err = server.ListenAndServe()
-	if err != nil {
-		log.Fatal("Failed to start service! Reason :", err.Error())
+	done := make(chan os.Signal, 1)
+	signal.Notify(done, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+
+	go func() {
+		if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalln("Failed to start service! Reason :", err.Error())
+		}
+	}()
+	log.Println("Server Started")
+
+	<-done
+	log.Println("Server Stopped")
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+
+	defer func() {
+		// extra handling here
+		cancel()
+	}()
+
+	if err := server.Shutdown(ctx); err != nil {
+		log.Fatalf("Server Shutdown Failed:%+v\n", err)
 	}
 
+	log.Println("Server Exited Properly")
+	log.Println("👋")
 }
 
 func readStopwordsFile(fileName string) (entity.StopwordData, error) {

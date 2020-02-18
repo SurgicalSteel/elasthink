@@ -18,33 +18,23 @@ package module
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import (
-	"errors"
 	"github.com/SurgicalSteel/elasthink/entity"
 	"strings"
 )
 
-func validateDocumentType(docType string) error {
+func validateDocumentType(docType string, documentTypeMap map[entity.DocumentType]int) error {
 	docType = strings.ToLower(docType)
 	documentType := entity.DocumentType(docType)
-	switch documentType {
-	case
-		entity.AdvertisementCampaignDocument,
-		entity.CampaignDocument:
-		return nil
-	default:
-		return errors.New("Invalid Document Type")
-	}
+	return documentType.IsValidFromCustomDocumentType(documentTypeMap)
 }
 
-func getDocumentType(docType string) entity.DocumentType {
+func getDocumentType(docType string, documentTypeMap map[entity.DocumentType]int) entity.DocumentType {
 	docType = strings.ToLower(docType)
 	documentType := entity.DocumentType(docType)
-	switch documentType {
-	case
-		entity.AdvertisementCampaignDocument,
-		entity.CampaignDocument:
-		return documentType
-	default:
+	err := documentType.IsValidFromCustomDocumentType(documentTypeMap)
+	if err != nil {
 		return ""
 	}
+	return documentType
+
 }

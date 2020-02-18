@@ -21,6 +21,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"github.com/SurgicalSteel/elasthink/entity"
 	"log"
 	"net/http"
 	"strings"
@@ -32,7 +33,7 @@ type CreateIndexRequestPayload struct {
 }
 
 func validateCreateIndexRequestPayload(documentID int64, documentType, documentName string) error {
-	err := validateDocumentType(documentType)
+	err := validateDocumentType(documentType, entity.Entity.GetDocumentTypes())
 	if err != nil {
 		return err
 	}
@@ -61,7 +62,7 @@ func CreateIndex(ctx context.Context, documentID int64, documentType string, req
 
 	documentNameSet := tokenize(requestPayload.DocumentName)
 
-	docType := getDocumentType(documentType)
+	docType := getDocumentType(documentType, entity.Entity.GetDocumentTypes())
 	errorExist := false
 	errorKeys := ""
 
@@ -102,7 +103,7 @@ type UpdateIndexRequestPayload struct {
 }
 
 func validateUpdateIndexRequestPayload(documentID int64, documentType, oldDocumentName, newDocumentName string) error {
-	err := validateDocumentType(documentType)
+	err := validateDocumentType(documentType, entity.Entity.GetDocumentTypes())
 	if err != nil {
 		return err
 	}
@@ -136,7 +137,7 @@ func UpdateIndex(ctx context.Context, documentID int64, documentType string, req
 	oldDocumentNameSet := tokenize(requestPayload.OldDocumentName)
 	newDocumentNameSet := tokenize(requestPayload.NewDocumentName)
 
-	docType := getDocumentType(documentType)
+	docType := getDocumentType(documentType, entity.Entity.GetDocumentTypes())
 
 	// remove old document indexes
 	isErrorRemoveExist := false

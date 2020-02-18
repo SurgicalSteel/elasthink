@@ -39,7 +39,7 @@ func validateSearchRequestPayload(documentType, searchTerm string) error {
 		return errors.New("Document Type is required")
 	}
 
-	err := validateDocumentType(documentType)
+	err := validateDocumentType(documentType, entity.Entity.GetDocumentTypes())
 	if err != nil {
 		return err
 	}
@@ -72,7 +72,7 @@ func Search(ctx context.Context, documentType string, requestPayload SearchReque
 		}
 	}
 
-	docType := getDocumentType(documentType)
+	docType := getDocumentType(documentType, entity.Entity.GetDocumentTypes())
 
 	wordIndexSets := fetchWordIndexSets(docType, searchTermSet)
 

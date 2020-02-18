@@ -18,6 +18,7 @@ package redis
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import (
+	"errors"
 	"github.com/SurgicalSteel/elasthink/config"
 	redigo "github.com/gomodule/redigo/redis"
 	"github.com/rafaeljusto/redigomock"
@@ -78,12 +79,21 @@ func TestSAdd(t *testing.T) {
 
 func TestSMembers(t *testing.T) {
 	conn := redigomock.NewConn()
-	// redisMock := &Redis{
-	// 	Pool: redigo.NewPool(func() (redigo.Conn, error) {
-	// 		return conn, nil
-	// 	}, 10),
-	// }
-
+	redisMock := &Redis{
+		Pool: redigo.NewPool(func() (redigo.Conn, error) {
+			return conn, nil
+		}, 10),
+	}
+	cmd := conn.Command("SMEMBERS", "campaign:bangun").Expect([]interface{}{"123", "234", "345", "456"})
+	_, err := redisMock.SMembers("campaign:bangun")
+	if err != nil {
+		t.Error("Expected : ok, but found error! err:", err.Error())
+		return
+	}
+	if conn.Stats(cmd) != 1 {
+		t.Error("Command SMEMBERS is not used!")
+		return
+	}
 	conn.Clear()
 }
 
@@ -101,8 +111,34 @@ func TestSRem(t *testing.T) {
 		return
 	}
 	if conn.Stats(cmd) != 1 {
-		t.Error("Command SADD is not used!")
+		t.Error("Command SREM is not used!")
 		return
 	}
+	conn.Clear()
+}
+
+func TestKeysPrefix(t *testing.T) {
+	conn := redigomock.NewConn()
+	redisMock := &Redis{
+		Pool: redigo.NewPool(func() (redigo.Conn, error) {
+			return conn, nil
+		}, 10),
+	}
+	//test case 1 : normal
+	cmd := conn.Command("KEYS", "campaign:*").Expect([]interface{}{"campaign:bangun", "campaign:tidur", "campaign:ganteng", "campaign:jalan"})
+	_, err := redisMock.KeysPrefix("campaign:")
+	if err != nil {
+		t.Error("Expected : ok, but found error! err:", err.Error())
+		return
+	}
+	if conn.Stats(cmd) != 1 {
+		t.Error("Command KEYS is not used!")
+		return
+	}
+
+	//test case 2 : expect error
+	keys, err := redisMock.KeysPrefix("             ")
+	assert.Equal(t, errors.New("Prefix must be defined!"), err)
+	assert.Equal(t, make([]string, 0), keys)
 	conn.Clear()
 }

@@ -18,3 +18,26 @@ package entity
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+type entityData struct {
+	documentTypes map[DocumentType]int
+	stopwordData  StopwordData
+}
+
+var Entity entityData
+
+func (e *entityData) Initialize(stopwordData StopwordData) {
+	e.documentTypes = map[DocumentType]int{
+		CampaignDocument:              1,
+		AdvertisementCampaignDocument: 1,
+	}
+	e.stopwordData = stopwordData
+}
+
+func (e *entityData) GetDocumentTypes() map[DocumentType]int {
+	return e.documentTypes
+}
+
+func (e *entityData) GetStopwordData() StopwordData {
+	return e.stopwordData
+}

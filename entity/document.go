@@ -17,7 +17,9 @@ package entity
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
-import ()
+import (
+	"errors"
+)
 
 //DocumentType is a type that represent document type
 type DocumentType string
@@ -31,3 +33,21 @@ const (
 	//CampaignDocument is the document type that represent Campaign document type (coupon for promotion)
 	CampaignDocument DocumentType = "campaign"
 )
+
+/*
+//IsValid checks if the document type is a valid (registered) document type in entity const
+func (dt DocumentType) IsValid() error {
+	switch dt {
+	case AdvertisementCampaignDocument, CampaignDocument:
+		return nil
+	}
+	return errors.New("Invalid Document Type")
+}
+*/
+//IsValidFromCustomType checks if the document type is a valid (registered) in a documentTypeMap (Custom Document Type)
+func (dt DocumentType) IsValidFromCustomDocumentType(documentTypeMap map[DocumentType]int) error {
+	if _, ok := documentTypeMap[dt]; ok {
+		return nil
+	}
+	return errors.New("Invalid Document Type")
+}
