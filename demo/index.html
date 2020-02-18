@@ -1,0 +1,81 @@
+<html>
+    <head>
+        <title>Elasthink Demo UI</title>
+        <link rel="stylesheet" type="text/css" href="stylesheet.css" media="screen">
+        <script
+			  src="https://code.jquery.com/jquery-3.4.1.min.js"
+			  integrity="sha256-CSXorXvZcTkaix6Yvo6HppcZGetbYMGWSFlBw8HfCJo="
+			  crossorigin="anonymous"></script>
+        <script src="https://cdn.jsdelivr.net/npm/sweetalert2@9"></script>
+        <script type="text/javascript">
+            $(document).ready(function(){
+                $(".searchbtn").click(function(){
+                    if(!checkSearchTerm()){
+                        Swal.fire({
+                            title:'Warning!',
+                            icon:'warning',
+                            text:'You must enter the search term!'
+                        });
+                        return;
+                    }else{
+                        $(".listresult").empty();
+                        var documentType = $(".document_type option:selected").val();
+                        var url = "http://127.0.0.1:9000/v1/"+documentType+"/_search";
+                        var payload = new Object();
+                        payload.SearchTerm = $(".search_term").val();
+
+                        $.ajax({
+                            type:"POST",
+                            url:url,
+                            dataType:"json",
+                            data:JSON.stringify(payload),
+                            success: function(response){
+                                var rankedResultList = response.data.rankedResultList;
+                                for(i=0;i<rankedResultList.length;i++){
+                                    $(".listresult").append("<pre>ID :"+rankedResultList[i].id);
+                                    $(".listresult").append("<pre>Show Count :"+rankedResultList[i].showCount);
+                                    $(".listresult").append("<pre>Rank :"+rankedResultList[i].rank);
+                                    $(".listresult").append("</br>");
+                                }
+                            },
+                            fail: function(){
+                                Swal.fire({
+                                    title:'Warning!',
+                                    icon:'warning',
+                                    text:'Failed to reach search endpoint, please check Elasthink back-end!'
+                                });
+                            }
+                        });
+                        console.log(url);
+                        console.log(payload);
+                    }
+
+                });
+            });
+
+            function checkSearchTerm(){
+                if($(".search_term").val().length === 0){
+                    return false;
+                }
+                return true;
+            }
+        </script>
+    </head>
+
+    <body>
+        <div align="center"><h1>Elasthink Demo UI</h1></div>
+        <div class="container">
+            <label for="search-term"><b>Search Term</b></label>
+            <input type="text" placeholder="Enter the search term..." name="search-term" class="search_term" required>
+
+            <label for="document-type"><b>Document Type</b></label>
+            <select name="document-type" class="document_type">
+                <option value="campaign" selected="selected">Campaign</option>
+                <option value="advcampaign">Advertisement Campaign</option>
+            </select>
+
+            <button type="submit" class="searchbtn">Search!</button>
+        </div>
+        <div class="listresult"></div>
+    </body>
+</html>
