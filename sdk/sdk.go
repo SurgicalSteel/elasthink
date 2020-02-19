@@ -26,7 +26,7 @@ import (
 var redisConfig *config.RedisConfigWrap
 
 type ElasthinkSDK struct {
-	Redis *redis.Redis
+	redis *redis.Redis
 }
 
 func Initialize(redisMaxIdle int,
@@ -51,4 +51,16 @@ func Initialize(redisMaxIdle int,
 		Redis: newRedis,
 	}
 	return elasthinkSDK
+}
+
+func (es *ElasthinkSDK) createIndex(index string) (bool, error) {
+	// ctx := context.Background()
+
+	// err = json.Unmarshal(body, &requestPayload)
+	// if err != nil {
+	// 	http.Error(w, err.Error(), http.StatusInternalServerError)
+	// 	return
+	// }
+	// es.Redis.
+	return true, nil
 }

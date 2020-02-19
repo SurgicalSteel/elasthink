@@ -1,4 +1,4 @@
-package module
+package util
 
 // Elasthink, An alternative to elasticsearch engine written in Go for small set of documents that uses inverted index to build the index and utilizes redis to store the indexes.
 // Copyright (C) 2020 Yuwono Bangun Nagoro (a.k.a SurgicalSteel)
@@ -18,13 +18,12 @@ package module
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import (
-	"github.com/SurgicalSteel/elasthink/util"
 	"regexp"
 	"strings"
 )
 
 //tokenize is a tokenizer function, basically to remove punctuations and (optional) to remove stopwords to a document name or a search term
-func tokenize(s string) map[string]int {
+func Tokenize(s string, isUsingStopwordRemoval bool, stopwordSet map[string]int) map[string]int {
 	s = strings.ToLower(s)
 	regex := regexp.MustCompile(`[^a-zA-Z0-9 ]`)
 	s = regex.ReplaceAllString(s, ` `)
@@ -39,10 +38,10 @@ func tokenize(s string) map[string]int {
 		}
 	}
 
-	wordsSet := util.CreateWordSet(words)
+	wordsSet := CreateWordSet(words)
 
-	if moduleObj.IsUsingStopwordRemoval {
-		return util.WordsSetSubtraction(wordsSet, moduleObj.StopwordSet)
+	if isUsingStopwordRemoval {
+		return WordsSetSubtraction(wordsSet, stopwordSet)
 	}
 
 	return wordsSet
