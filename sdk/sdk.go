@@ -53,12 +53,43 @@ type SdkConfig struct {
 	availableDocumentType   []string
 }
 
-// CreateIndexSpec is the spec of createIndex function
+// CreateIndexSpec is the spec of CreateIndex function
+// documentType is the type of the document
 // documentName is the name of the document
 // documentID is the id of the document
 type CreateIndexSpec struct {
+	documentType string
 	documentName string
-	documentID   string
+	documentID   int64
+}
+
+// UpdateIndexSpec is the spec of UpdateIndex function
+// oldDocumentName is the name of the old document which will be replaced by new document
+// newDocumentName is the name of the new document
+// documentID is the id of the document
+type UpdateIndexSpec struct {
+	documentType    string
+	oldDocumentName string
+	newDocumentName string
+	documentID      int64
+}
+
+// SearchSpec is the spec of Search function
+type SearchSpec struct {
+	documentType string
+	searchTerm   string
+}
+
+// SearchResultRankData is the search result
+type SearchResultRankData struct {
+	ID        int64
+	ShowCount int
+	Rank      int
+}
+
+// SearchResult is the result of Search
+type SearchResult struct {
+	RankedResultList []SearchResultRankData
 }
 
 /// Functions
@@ -94,7 +125,11 @@ func Initialize(initializeSpec InitializeSpec) ElasthinkSDK {
 // documentType is the type of the document, to categorize documents. For example: campaign
 // documentID, is the ID of document, the key of document. For example: 1
 // documentName, is the name of documennt, the value which will be indexed. For example: "we want to eat seafood on a restaurant"
-func (es *ElasthinkSDK) CreateIndex(documentType string, documentID int64, documentName string) (bool, error) {
+func (es *ElasthinkSDK) CreateIndex(spec CreateIndexSpec) (bool, error) {
+	documentID := spec.documentID
+	documentType := spec.documentType
+	documentName := spec.documentName
+
 	// Validation
 	err := es.validateCreateIndexRequestPayload(documentID, documentType, documentName)
 	if err != nil {
@@ -133,6 +168,120 @@ func (es *ElasthinkSDK) CreateIndex(documentType string, documentID int64, docum
 	return true, nil
 }
 
+//UpdateIndex is function to update previously created index
+func (es *ElasthinkSDK) UpdateIndex(spec UpdateIndexSpec) (bool, error) {
+	documentID := spec.documentID
+	documentType := spec.documentType
+	oldDocumentName := spec.oldDocumentName
+	newDocumentName := spec.newDocumentName
+
+	// Validate
+	err := es.validateUpdateIndexRequestPayload(documentID, documentType, spec.oldDocumentName, spec.newDocumentName)
+	if err != nil {
+		return false, err
+	}
+
+	// Tokenize
+	stopword := make(map[string]int)
+	for _, k := range es.stopWordRemovalData {
+		stopword[k] = 1
+	}
+	redis := es.redis
+	oldDocumentNameSet := util.Tokenize(oldDocumentName, es.isUsingStopWordsRemoval, stopword)
+	newDocumentNameSet := util.Tokenize(newDocumentName, es.isUsingStopWordsRemoval, stopword)
+
+	docType := spec.documentType
+
+	// remove old document indexes
+	isErrorRemoveExist := false
+	errorRemoveKeys := ""
+
+	for k := range oldDocumentNameSet {
+		key := fmt.Sprintf("%s:%s", docType, k)
+		value := make([]interface{}, 1)
+		value[0] = fmt.Sprintf("%d", documentID)
+		_, err = redis.SRem(key, value)
+		if err != nil {
+			isErrorRemoveExist = true
+			errorRemoveKeys = errorRemoveKeys + " " + key + ","
+			log.Println("[MODULE][UPDATE INDEX] failed to remove index on key :", key, "and document ID:", documentID)
+			continue
+		}
+	}
+
+	// add new document indexes
+	isErrorAddExist := false
+	errorAddKeys := ""
+
+	for k := range newDocumentNameSet {
+		key := fmt.Sprintf("%s:%s", docType, k)
+		value := make([]interface{}, 1)
+		value[0] = fmt.Sprintf("%d", documentID)
+		_, err = redis.SAdd(key, value)
+		if err != nil {
+			isErrorAddExist = true
+			errorAddKeys = errorAddKeys + " " + key + ","
+			log.Println("[MODULE][UPDATE INDEX] failed to add index on key :", key, "and document ID:", documentID)
+			continue
+		}
+	}
+
+	if isErrorAddExist || isErrorRemoveExist {
+		errorRemoveKeys = strings.TrimRight(errorRemoveKeys, ",")
+		errorRemoveKeys = strings.TrimLeft(errorRemoveKeys, " ")
+
+		errorAddKeys = strings.TrimRight(errorAddKeys, ",")
+		errorAddKeys = strings.TrimLeft(errorAddKeys, " ")
+
+		errorMessage := fmt.Sprintf("Error on removing following keys: %s and/or Error on adding following keys: %s", errorRemoveKeys, errorAddKeys)
+		return false, errors.New(errorMessage)
+	}
+
+	return true, nil
+}
+
+//Search is the core function of searching a document
+func (es *ElasthinkSDK) Search(spec SearchSpec) (SearchResult, error) {
+	// err := validateSearchRequestPayload(documentType, requestPayload.SearchTerm)
+	// if err != nil {
+	// 	return Response{
+	// 		StatusCode:   http.StatusBadRequest,
+	// 		ErrorMessage: err.Error(),
+	// 		Data:         nil,
+	// 	}
+	// }
+
+	// searchTermSet := util.Tokenize(requestPayload.SearchTerm, moduleObj.IsUsingStopwordRemoval, moduleObj.StopwordSet)
+	// if len(searchTermSet) == 0 {
+	// 	return Response{
+	// 		StatusCode:   http.StatusOK,
+	// 		ErrorMessage: "",
+	// 		Data:         nil,
+	// 	}
+	// }
+
+	// docType := getDocumentType(documentType, entity.Entity.GetDocumentTypes())
+
+	// wordIndexSets := fetchWordIndexSets(docType, searchTermSet)
+
+	// if len(wordIndexSets) == 0 {
+	// 	return Response{
+	// 		StatusCode:   http.StatusOK,
+	// 		ErrorMessage: "",
+	// 		Data:         nil,
+	// 	}
+	// }
+
+	// rankedSearchResult := rankSearchResult(wordIndexSets)
+	// searchResponsePayload := SearchResponsePayload{RankedResultList: rankedSearchResult}
+
+	// return Response{
+	// 	StatusCode:   http.StatusOK,
+	// 	ErrorMessage: "",
+	// 	Data:         searchResponsePayload,
+	// }
+}
+
 /// Private Functions
 
 // validateCreateIndexRequestPayload validates create index request payloads
@@ -159,4 +308,25 @@ func (es *ElasthinkSDK) isValidFromCustomDocumentType(documentType string) error
 		return nil
 	}
 	return errors.New("Invalid Document Type")
+}
+
+func (es *ElasthinkSDK) validateUpdateIndexRequestPayload(documentID int64, documentType, oldDocumentName, newDocumentName string) error {
+	err := es.isValidFromCustomDocumentType(documentType)
+	if err != nil {
+		return err
+	}
+
+	if documentID <= 0 {
+		return errors.New("Invalid Document ID")
+	}
+
+	if len(strings.Trim(oldDocumentName, " ")) == 0 {
+		return errors.New("Old Document Name must not be empty")
+	}
+
+	if len(strings.Trim(newDocumentName, " ")) == 0 {
+		return errors.New("Document Name must not be empty")
+	}
+
+	return nil
 }
