@@ -18,8 +18,9 @@ package module
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import (
-	"github.com/SurgicalSteel/elasthink/entity"
 	"strings"
+
+	"github.com/SurgicalSteel/elasthink/entity"
 )
 
 func validateDocumentType(docType string, documentTypeMap map[entity.DocumentType]int) error {

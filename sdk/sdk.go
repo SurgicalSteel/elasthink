@@ -1,14 +1,12 @@
 package module
 
 import (
-	"context"
+	"errors"
 	"fmt"
 	"log"
-	"net/http"
 	"strings"
 
 	"github.com/SurgicalSteel/elasthink/config"
-	"github.com/SurgicalSteel/elasthink/entity"
 	"github.com/SurgicalSteel/elasthink/redis"
 	"github.com/SurgicalSteel/elasthink/util"
 )
@@ -31,6 +29,7 @@ import (
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+/// Variables and structures
 var redisConfig *config.RedisConfigWrap
 
 // ElasthinkSDK is the main struct of elasthink SDK, initialized using initalize function
@@ -38,7 +37,20 @@ type ElasthinkSDK struct {
 	redis                   *redis.Redis
 	isUsingStopWordsRemoval bool
 	stopWordRemovalData     []string
-	entity                  EntityData
+	availableDocumentType   map[string]int
+}
+
+// InitializeSpec is the payload for initialize Elasthink SDK
+type InitializeSpec struct {
+	redisConfig config.RedisConfig
+	sdkConfig   SdkConfig
+}
+
+// SdkConfig is the configuration for initialize Elasthink SDK
+type SdkConfig struct {
+	isUsingStopWordsRemoval bool
+	stopWordRemovalData     []string
+	availableDocumentType   []string
 }
 
 // CreateIndexSpec is the spec of createIndex function
@@ -49,37 +61,42 @@ type CreateIndexSpec struct {
 	documentID   string
 }
 
+/// Functions
+
 // Initialize is the function that return ElasthinkSDK
-func Initialize(redisMaxIdle int,
-	redisMaxActive int,
-	redisTimeout int,
-	redisAddress string,
-	isUsingStopWordsRemoval bool,
-	stopWordRemovalData []string) ElasthinkSDK {
+func Initialize(initializeSpec InitializeSpec) ElasthinkSDK {
 
 	spec := config.RedisConfigWrap{
 		RedisElasthink: config.RedisConfig{
-			MaxIdle:   redisMaxIdle,
-			MaxActive: redisMaxActive,
-			Address:   redisAddress,
-			Timeout:   redisTimeout,
+			MaxIdle:   initializeSpec.redisConfig.MaxIdle,
+			MaxActive: initializeSpec.redisConfig.MaxActive,
+			Address:   initializeSpec.redisConfig.Address,
+			Timeout:   initializeSpec.redisConfig.Timeout,
 		},
 	}
-
 	newRedis := redis.InitRedis(spec)
+
+	availableDocumentType := make(map[string]int)
+	for _, doctype := range initializeSpec.sdkConfig.availableDocumentType {
+		availableDocumentType[doctype] = 1
+	}
 
 	elasthinkSDK := ElasthinkSDK{
 		redis:                   newRedis,
-		isUsingStopWordsRemoval: isUsingStopWordsRemoval,
-		stopWordRemovalData:     stopWordRemovalData,
+		isUsingStopWordsRemoval: initializeSpec.sdkConfig.isUsingStopWordsRemoval,
+		stopWordRemovalData:     initializeSpec.sdkConfig.stopWordRemovalData,
+		availableDocumentType:   availableDocumentType,
 	}
 	return elasthinkSDK
 }
 
-func (es *ElasthinkSDK) CreateIndex(documentType string, documentID string, documentName string) (bool, error) {
-	ctx := context.Background()
+// CreateIndex is a function to create new index based on documentType, documentID, and document name
+// documentType is the type of the document, to categorize documents. For example: campaign
+// documentID, is the ID of document, the key of document. For example: 1
+// documentName, is the name of documennt, the value which will be indexed. For example: "we want to eat seafood on a restaurant"
+func (es *ElasthinkSDK) CreateIndex(documentType string, documentID int64, documentName string) (bool, error) {
 	// Validation
-	err := validateCreateIndexRequestPayload(documentID, documentType, documentName)
+	err := es.validateCreateIndexRequestPayload(documentID, documentType, documentName)
 	if err != nil {
 		return false, err
 	}
@@ -92,11 +109,11 @@ func (es *ElasthinkSDK) CreateIndex(documentType string, documentID string, docu
 	redis := es.redis
 	documentNameSet := util.Tokenize(documentName, es.isUsingStopWordsRemoval, stopword)
 
-	docType := getDocumentType(documentType, entity.Entity.GetDocumentTypes())
+	docType := documentType
 	errorExist := false
 	errorKeys := ""
 
-	for k, _ := range documentNameSet {
+	for k := range documentNameSet {
 		key := fmt.Sprintf("%s:%s", docType, k)
 		value := make([]interface{}, 1)
 		value[0] = fmt.Sprintf("%d", documentID)
@@ -110,20 +127,36 @@ func (es *ElasthinkSDK) CreateIndex(documentType string, documentID string, docu
 	}
 
 	if errorExist {
-		errorKeys = strings.TrimRight(errorKeys, ",")
-		errorKeys = strings.TrimLeft(errorKeys, " ")
-		return false, Response{
-			StatusCode:   http.StatusInternalServerError,
-			ErrorMessage: fmt.Sprintf("Error on adding following keys :%s", errorKeys),
-			Data:         nil,
-		}
-	} else {
-		return false, Response{
-			StatusCode:   http.StatusOK,
-			ErrorMessage: "",
-			Data:         nil,
-		}
+		return false, err
 	}
 
 	return true, nil
+}
+
+/// Private Functions
+
+// validateCreateIndexRequestPayload validates create index request payloads
+func (es *ElasthinkSDK) validateCreateIndexRequestPayload(documentID int64, documentType, documentName string) error {
+	err := es.isValidFromCustomDocumentType(documentType)
+	if err != nil {
+		return err
+	}
+
+	if documentID <= 0 {
+		return errors.New("Invalid Document ID")
+	}
+
+	if len(strings.Trim(documentName, " ")) == 0 {
+		return errors.New("Document Name must not be empty")
+	}
+
+	return nil
+}
+
+// Validate is the document type is valid or not
+func (es *ElasthinkSDK) isValidFromCustomDocumentType(documentType string) error {
+	if _, ok := es.availableDocumentType[documentType]; ok {
+		return nil
+	}
+	return errors.New("Invalid Document Type")
 }
