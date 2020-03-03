@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/SurgicalSteel/elasthink/config"
+	"github.com/SurgicalSteel/elasthink/entity"
 	"github.com/SurgicalSteel/elasthink/redis"
 	"github.com/SurgicalSteel/elasthink/util"
 )
@@ -80,16 +81,16 @@ type SearchSpec struct {
 	searchTerm   string
 }
 
-// SearchResultRankData is the search result
-type SearchResultRankData struct {
-	ID        int64
-	ShowCount int
-	Rank      int
-}
+// // SearchResultRankData is the search result
+// type SearchResultRankData struct {
+// 	ID        int64
+// 	ShowCount int
+// 	Rank      int
+// }
 
 // SearchResult is the result of Search
 type SearchResult struct {
-	RankedResultList []SearchResultRankData
+	RankedResultList []entity.SearchResultRankData
 }
 
 /// Functions
@@ -131,7 +132,7 @@ func (es *ElasthinkSDK) CreateIndex(spec CreateIndexSpec) (bool, error) {
 	documentName := spec.documentName
 
 	// Validation
-	err := es.validateCreateIndexRequestPayload(documentID, documentType, documentName)
+	err := es.validateCreateIndexSpec(documentID, documentType, documentName)
 	if err != nil {
 		return false, err
 	}
@@ -156,7 +157,7 @@ func (es *ElasthinkSDK) CreateIndex(spec CreateIndexSpec) (bool, error) {
 		if err != nil {
 			errorExist = true
 			errorKeys = errorKeys + " " + key + ","
-			log.Println("[MODULE][CREATE INDEX] failed to add index on key :", key, "and document ID:", documentID)
+			log.Println("[SDK_REDIS][CREATE INDEX] failed to add index on key :", key, "and document ID:", documentID)
 			continue
 		}
 	}
@@ -174,9 +175,10 @@ func (es *ElasthinkSDK) UpdateIndex(spec UpdateIndexSpec) (bool, error) {
 	documentType := spec.documentType
 	oldDocumentName := spec.oldDocumentName
 	newDocumentName := spec.newDocumentName
+	redis := es.redis
 
 	// Validate
-	err := es.validateUpdateIndexRequestPayload(documentID, documentType, spec.oldDocumentName, spec.newDocumentName)
+	err := es.validateUpdateIndexSpec(documentID, documentType, spec.oldDocumentName, spec.newDocumentName)
 	if err != nil {
 		return false, err
 	}
@@ -186,7 +188,6 @@ func (es *ElasthinkSDK) UpdateIndex(spec UpdateIndexSpec) (bool, error) {
 	for _, k := range es.stopWordRemovalData {
 		stopword[k] = 1
 	}
-	redis := es.redis
 	oldDocumentNameSet := util.Tokenize(oldDocumentName, es.isUsingStopWordsRemoval, stopword)
 	newDocumentNameSet := util.Tokenize(newDocumentName, es.isUsingStopWordsRemoval, stopword)
 
@@ -204,7 +205,7 @@ func (es *ElasthinkSDK) UpdateIndex(spec UpdateIndexSpec) (bool, error) {
 		if err != nil {
 			isErrorRemoveExist = true
 			errorRemoveKeys = errorRemoveKeys + " " + key + ","
-			log.Println("[MODULE][UPDATE INDEX] failed to remove index on key :", key, "and document ID:", documentID)
+			log.Println("[SDK_REDIS][UPDATE INDEX] failed to remove index on key :", key, "and document ID:", documentID)
 			continue
 		}
 	}
@@ -221,7 +222,7 @@ func (es *ElasthinkSDK) UpdateIndex(spec UpdateIndexSpec) (bool, error) {
 		if err != nil {
 			isErrorAddExist = true
 			errorAddKeys = errorAddKeys + " " + key + ","
-			log.Println("[MODULE][UPDATE INDEX] failed to add index on key :", key, "and document ID:", documentID)
+			log.Println("[SDK_REDIS][UPDATE INDEX] failed to add index on key :", key, "and document ID:", documentID)
 			continue
 		}
 	}
@@ -242,50 +243,43 @@ func (es *ElasthinkSDK) UpdateIndex(spec UpdateIndexSpec) (bool, error) {
 
 //Search is the core function of searching a document
 func (es *ElasthinkSDK) Search(spec SearchSpec) (SearchResult, error) {
-	// err := validateSearchRequestPayload(documentType, requestPayload.SearchTerm)
-	// if err != nil {
-	// 	return Response{
-	// 		StatusCode:   http.StatusBadRequest,
-	// 		ErrorMessage: err.Error(),
-	// 		Data:         nil,
-	// 	}
-	// }
+	searchTerm := spec.searchTerm
+	documentType := spec.documentType
 
-	// searchTermSet := util.Tokenize(requestPayload.SearchTerm, moduleObj.IsUsingStopwordRemoval, moduleObj.StopwordSet)
-	// if len(searchTermSet) == 0 {
-	// 	return Response{
-	// 		StatusCode:   http.StatusOK,
-	// 		ErrorMessage: "",
-	// 		Data:         nil,
-	// 	}
-	// }
+	ret := SearchResult{RankedResultList: make([]entity.SearchResultRankData, 0)}
 
-	// docType := getDocumentType(documentType, entity.Entity.GetDocumentTypes())
+	err := es.validateSearchSpec(documentType, searchTerm)
+	if err != nil {
+		return ret, err
+	}
 
-	// wordIndexSets := fetchWordIndexSets(docType, searchTermSet)
+	stopword := make(map[string]int)
+	for _, k := range es.stopWordRemovalData {
+		stopword[k] = 1
+	}
+	searchTermSet := util.Tokenize(searchTerm, es.isUsingStopWordsRemoval, stopword)
+	if len(searchTermSet) == 0 {
+		return ret, nil
+	}
 
-	// if len(wordIndexSets) == 0 {
-	// 	return Response{
-	// 		StatusCode:   http.StatusOK,
-	// 		ErrorMessage: "",
-	// 		Data:         nil,
-	// 	}
-	// }
+	docType := documentType
 
-	// rankedSearchResult := rankSearchResult(wordIndexSets)
-	// searchResponsePayload := SearchResponsePayload{RankedResultList: rankedSearchResult}
+	wordIndexSets := es.fetchWordIndexSets(docType, searchTermSet)
 
-	// return Response{
-	// 	StatusCode:   http.StatusOK,
-	// 	ErrorMessage: "",
-	// 	Data:         searchResponsePayload,
-	// }
+	if len(wordIndexSets) == 0 {
+		return ret, err
+	}
+
+	rankedSearchResult := entity.rankSearchResult(wordIndexSets)
+	ret.RankedResultList = rankedSearchResult
+
+	return ret, nil
 }
 
 /// Private Functions
 
-// validateCreateIndexRequestPayload validates create index request payloads
-func (es *ElasthinkSDK) validateCreateIndexRequestPayload(documentID int64, documentType, documentName string) error {
+// validateCreateIndexSpec validates create index spec
+func (es *ElasthinkSDK) validateCreateIndexSpec(documentID int64, documentType, documentName string) error {
 	err := es.isValidFromCustomDocumentType(documentType)
 	if err != nil {
 		return err
@@ -310,7 +304,8 @@ func (es *ElasthinkSDK) isValidFromCustomDocumentType(documentType string) error
 	return errors.New("Invalid Document Type")
 }
 
-func (es *ElasthinkSDK) validateUpdateIndexRequestPayload(documentID int64, documentType, oldDocumentName, newDocumentName string) error {
+// validateUpdateIndexSpec validate update index spec
+func (es *ElasthinkSDK) validateUpdateIndexSpec(documentID int64, documentType, oldDocumentName, newDocumentName string) error {
 	err := es.isValidFromCustomDocumentType(documentType)
 	if err != nil {
 		return err
@@ -329,4 +324,41 @@ func (es *ElasthinkSDK) validateUpdateIndexRequestPayload(documentID int64, docu
 	}
 
 	return nil
+}
+
+// validateSearchSpec validate search spec
+func (es *ElasthinkSDK) validateSearchSpec(documentType, searchTerm string) error {
+	if len(strings.Trim(searchTerm, " ")) == 0 {
+		return errors.New("Search Term is required")
+	}
+
+	if len(strings.Trim(documentType, " ")) == 0 {
+		return errors.New("Document Type is required")
+	}
+
+	err := es.isValidFromCustomDocumentType(documentType)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// fetchWordIndexSets
+func (es *ElasthinkSDK) fetchWordIndexSets(documentType string, searchTermSet map[string]int) map[string][]int64 {
+	result := make(map[string][]int64)
+
+	// set key format --> documentType:word
+	for k := range searchTermSet {
+		key := fmt.Sprintf("%s:%s", documentType, k)
+		members, err := es.redis.SMembers(key)
+		if err != nil {
+			log.Println("[SDK_REDIS][FETCHER] Failed to get members of key :", key)
+			continue
+		}
+		documentIds := util.SliceStringToInt64(members)
+		result[k] = documentIds
+	}
+
+	return result
 }
