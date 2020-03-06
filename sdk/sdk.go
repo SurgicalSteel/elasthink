@@ -4,10 +4,10 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"sort"
 	"strings"
 
 	"github.com/SurgicalSteel/elasthink/config"
-	"github.com/SurgicalSteel/elasthink/entity"
 	"github.com/SurgicalSteel/elasthink/redis"
 	"github.com/SurgicalSteel/elasthink/util"
 )
@@ -81,19 +81,33 @@ type SearchSpec struct {
 	searchTerm   string
 }
 
-// // SearchResultRankData is the search result
-// type SearchResultRankData struct {
-// 	ID        int64
-// 	ShowCount int
-// 	Rank      int
-// }
-
-// SearchResult is the result of Search
-type SearchResult struct {
-	RankedResultList []entity.SearchResultRankData
+// SearchResultRankData is the search result datum
+type SearchResultRankData struct {
+	ID        int64
+	ShowCount int
+	Rank      int
 }
 
-/// Functions
+// SearchResult is the result of Search, it have array of search result datum
+type SearchResult struct {
+	RankedResultList RankByShowCount
+}
+
+//RankByShowCount is the additional struct for document ranking purpose based on its ShowCount
+type RankByShowCount []SearchResultRankData
+
+// Len overrides Len function of RankByShowCount
+func (r RankByShowCount) Len() int { return len(r) }
+
+// Less overrides Less function of RankByShowCount
+func (r RankByShowCount) Less(i, j int) bool {
+	return r[i].ShowCount > r[j].ShowCount
+}
+
+// Swap overrides Swap function of RankByShowCount
+func (r RankByShowCount) Swap(i, j int) {
+	r[i], r[j] = r[j], r[i]
+}
 
 // Initialize is the function that return ElasthinkSDK
 func Initialize(initializeSpec InitializeSpec) ElasthinkSDK {
@@ -246,7 +260,7 @@ func (es *ElasthinkSDK) Search(spec SearchSpec) (SearchResult, error) {
 	searchTerm := spec.searchTerm
 	documentType := spec.documentType
 
-	ret := SearchResult{RankedResultList: make([]entity.SearchResultRankData, 0)}
+	ret := SearchResult{RankedResultList: make([]SearchResultRankData, 0)}
 
 	err := es.validateSearchSpec(documentType, searchTerm)
 	if err != nil {
@@ -270,7 +284,7 @@ func (es *ElasthinkSDK) Search(spec SearchSpec) (SearchResult, error) {
 		return ret, err
 	}
 
-	rankedSearchResult := entity.rankSearchResult(wordIndexSets)
+	rankedSearchResult := rankSearchResult(wordIndexSets)
 	ret.RankedResultList = rankedSearchResult
 
 	return ret, nil
@@ -358,6 +372,43 @@ func (es *ElasthinkSDK) fetchWordIndexSets(documentType string, searchTermSet ma
 		}
 		documentIds := util.SliceStringToInt64(members)
 		result[k] = documentIds
+	}
+
+	return result
+}
+
+//rankSearchResult ranks search result (document id by its appeareance count). word indexes is a map with word as a key and slice of ids as value. Returns ordered search result rank slice.
+func rankSearchResult(wordIndexes map[string][]int64) []SearchResultRankData {
+	counterMap := make(map[int64]int)
+	for _, ids := range wordIndexes {
+		for i := 0; i < len(ids); i++ {
+			if vcm, ok := counterMap[ids[i]]; ok {
+				counterMap[ids[i]] = vcm + 1
+			} else {
+				counterMap[ids[i]] = 1
+			}
+		}
+	}
+
+	result := make([]SearchResultRankData, len(counterMap))
+
+	iterator := 0
+	for kcm, vcm := range counterMap {
+		result[iterator] = SearchResultRankData{
+			ID:        kcm,
+			ShowCount: vcm,
+		}
+		iterator++
+	}
+
+	//sort by appeareance count (descending)
+	sort.Sort(RankByShowCount(result))
+
+	//assign rank to each search result data
+	for i := 0; i < len(result); i++ {
+		temp := result[i]
+		temp.Rank = i + 1
+		result[i] = temp
 	}
 
 	return result
