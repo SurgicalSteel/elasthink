@@ -34,16 +34,16 @@ import (
 
 // ElasthinkSDK is the main struct of elasthink SDK, initialized using initalize function
 type ElasthinkSDK struct {
-	redis                   *redis.Redis
-	isUsingStopWordsRemoval bool
-	stopWordRemovalData     []string
-	availableDocumentType   map[string]int
+	Redis                   *redis.Redis
+	IsUsingStopWordsRemoval bool
+	StopWordRemovalData     []string
+	AvailableDocumentType   map[string]int
 }
 
 // InitializeSpec is the payload for initialize Elasthink SDK
 type InitializeSpec struct {
-	redisConfig RedisConfig
-	sdkConfig   SdkConfig
+	RedisConfig RedisConfig
+	SdkConfig   SdkConfig
 }
 
 //RedisConfig is the basic configuration for a redis connection
@@ -56,36 +56,36 @@ type RedisConfig struct {
 
 // SdkConfig is the configuration for initialize Elasthink SDK
 type SdkConfig struct {
-	isUsingStopWordsRemoval bool
-	stopWordRemovalData     []string
-	availableDocumentType   []string
+	IsUsingStopWordsRemoval bool
+	StopWordRemovalData     []string
+	AvailableDocumentType   []string
 }
 
 // CreateIndexSpec is the spec of CreateIndex function
-// documentType is the type of the document
-// documentName is the name of the document
-// documentID is the id of the document
+// DocumentType is the type of the document
+// DocumentName is the name of the document
+// DocumentID is the id of the document
 type CreateIndexSpec struct {
-	documentType string
-	documentName string
-	documentID   int64
+	DocumentType string
+	DocumentName string
+	DocumentID   int64
 }
 
 // UpdateIndexSpec is the spec of UpdateIndex function
-// oldDocumentName is the name of the old document which will be replaced by new document
-// newDocumentName is the name of the new document
-// documentID is the id of the document
+// OldDocumentName is the name of the old document which will be replaced by new document
+// NewDocumentName is the name of the new document
+// DocumentID is the id of the document
 type UpdateIndexSpec struct {
-	documentType    string
-	oldDocumentName string
-	newDocumentName string
-	documentID      int64
+	DocumentType    string
+	OldDocumentName string
+	NewDocumentName string
+	DocumentID      int64
 }
 
 // SearchSpec is the spec of Search function
 type SearchSpec struct {
-	documentType string
-	searchTerm   string
+	DocumentType string
+	SearchTerm   string
 }
 
 // SearchResultRankData is the search result datum
@@ -121,24 +121,24 @@ func Initialize(initializeSpec InitializeSpec) ElasthinkSDK {
 
 	spec := config.RedisConfigWrap{
 		RedisElasthink: config.RedisConfig{
-			MaxIdle:   initializeSpec.redisConfig.MaxIdle,
-			MaxActive: initializeSpec.redisConfig.MaxActive,
-			Address:   initializeSpec.redisConfig.Address,
-			Timeout:   initializeSpec.redisConfig.Timeout,
+			MaxIdle:   initializeSpec.RedisConfig.MaxIdle,
+			MaxActive: initializeSpec.RedisConfig.MaxActive,
+			Address:   initializeSpec.RedisConfig.Address,
+			Timeout:   initializeSpec.RedisConfig.Timeout,
 		},
 	}
 	newRedis := redis.InitRedis(spec)
 
 	availableDocumentType := make(map[string]int)
-	for _, doctype := range initializeSpec.sdkConfig.availableDocumentType {
+	for _, doctype := range initializeSpec.SdkConfig.AvailableDocumentType {
 		availableDocumentType[doctype] = 1
 	}
 
 	elasthinkSDK := ElasthinkSDK{
-		redis:                   newRedis,
-		isUsingStopWordsRemoval: initializeSpec.sdkConfig.isUsingStopWordsRemoval,
-		stopWordRemovalData:     initializeSpec.sdkConfig.stopWordRemovalData,
-		availableDocumentType:   availableDocumentType,
+		Redis:                   newRedis,
+		IsUsingStopWordsRemoval: initializeSpec.SdkConfig.IsUsingStopWordsRemoval,
+		StopWordRemovalData:     initializeSpec.SdkConfig.StopWordRemovalData,
+		AvailableDocumentType:   availableDocumentType,
 	}
 	return elasthinkSDK
 }
@@ -148,9 +148,9 @@ func Initialize(initializeSpec InitializeSpec) ElasthinkSDK {
 // documentID, is the ID of document, the key of document. For example: 1
 // documentName, is the name of documennt, the value which will be indexed. For example: "we want to eat seafood on a restaurant"
 func (es *ElasthinkSDK) CreateIndex(spec CreateIndexSpec) (bool, error) {
-	documentID := spec.documentID
-	documentType := spec.documentType
-	documentName := spec.documentName
+	documentID := spec.DocumentID
+	documentType := spec.DocumentType
+	documentName := spec.DocumentName
 
 	// Validation
 	err := es.validateCreateIndexSpec(documentID, documentType, documentName)
@@ -160,11 +160,11 @@ func (es *ElasthinkSDK) CreateIndex(spec CreateIndexSpec) (bool, error) {
 
 	// Tokenize document name set
 	stopword := make(map[string]int)
-	for _, k := range es.stopWordRemovalData {
+	for _, k := range es.StopWordRemovalData {
 		stopword[k] = 1
 	}
-	redis := es.redis
-	documentNameSet := util.Tokenize(documentName, es.isUsingStopWordsRemoval, stopword)
+	redis := es.Redis
+	documentNameSet := util.Tokenize(documentName, es.IsUsingStopWordsRemoval, stopword)
 
 	docType := documentType
 	errorExist := false
@@ -192,27 +192,27 @@ func (es *ElasthinkSDK) CreateIndex(spec CreateIndexSpec) (bool, error) {
 
 //UpdateIndex is function to update previously created index
 func (es *ElasthinkSDK) UpdateIndex(spec UpdateIndexSpec) (bool, error) {
-	documentID := spec.documentID
-	documentType := spec.documentType
-	oldDocumentName := spec.oldDocumentName
-	newDocumentName := spec.newDocumentName
-	redis := es.redis
+	documentID := spec.DocumentID
+	documentType := spec.DocumentType
+	oldDocumentName := spec.OldDocumentName
+	newDocumentName := spec.NewDocumentName
+	redis := es.Redis
 
 	// Validate
-	err := es.validateUpdateIndexSpec(documentID, documentType, spec.oldDocumentName, spec.newDocumentName)
+	err := es.validateUpdateIndexSpec(documentID, documentType, spec.OldDocumentName, spec.NewDocumentName)
 	if err != nil {
 		return false, err
 	}
 
 	// Tokenize
 	stopword := make(map[string]int)
-	for _, k := range es.stopWordRemovalData {
+	for _, k := range es.StopWordRemovalData {
 		stopword[k] = 1
 	}
-	oldDocumentNameSet := util.Tokenize(oldDocumentName, es.isUsingStopWordsRemoval, stopword)
-	newDocumentNameSet := util.Tokenize(newDocumentName, es.isUsingStopWordsRemoval, stopword)
+	oldDocumentNameSet := util.Tokenize(oldDocumentName, es.IsUsingStopWordsRemoval, stopword)
+	newDocumentNameSet := util.Tokenize(newDocumentName, es.IsUsingStopWordsRemoval, stopword)
 
-	docType := spec.documentType
+	docType := spec.DocumentType
 
 	// remove old document indexes
 	isErrorRemoveExist := false
@@ -264,8 +264,8 @@ func (es *ElasthinkSDK) UpdateIndex(spec UpdateIndexSpec) (bool, error) {
 
 //Search is the core function of searching a document
 func (es *ElasthinkSDK) Search(spec SearchSpec) (SearchResult, error) {
-	searchTerm := spec.searchTerm
-	documentType := spec.documentType
+	searchTerm := spec.SearchTerm
+	documentType := spec.DocumentType
 
 	ret := SearchResult{RankedResultList: make([]SearchResultRankData, 0)}
 
@@ -275,10 +275,10 @@ func (es *ElasthinkSDK) Search(spec SearchSpec) (SearchResult, error) {
 	}
 
 	stopword := make(map[string]int)
-	for _, k := range es.stopWordRemovalData {
+	for _, k := range es.StopWordRemovalData {
 		stopword[k] = 1
 	}
-	searchTermSet := util.Tokenize(searchTerm, es.isUsingStopWordsRemoval, stopword)
+	searchTermSet := util.Tokenize(searchTerm, es.IsUsingStopWordsRemoval, stopword)
 	if len(searchTermSet) == 0 {
 		return ret, nil
 	}
@@ -319,7 +319,7 @@ func (es *ElasthinkSDK) validateCreateIndexSpec(documentID int64, documentType, 
 
 // Validate is the document type is valid or not
 func (es *ElasthinkSDK) isValidFromCustomDocumentType(documentType string) error {
-	if _, ok := es.availableDocumentType[documentType]; ok {
+	if _, ok := es.AvailableDocumentType[documentType]; ok {
 		return nil
 	}
 	return errors.New("Invalid Document Type")
@@ -372,7 +372,7 @@ func (es *ElasthinkSDK) fetchWordIndexSets(documentType string, searchTermSet ma
 	// set key format --> documentType:word
 	for k := range searchTermSet {
 		key := fmt.Sprintf("%s:%s", documentType, k)
-		members, err := es.redis.SMembers(key)
+		members, err := es.Redis.SMembers(key)
 		if err != nil {
 			log.Println("[SDK_REDIS][FETCHER] Failed to get members of key :", key)
 			continue
