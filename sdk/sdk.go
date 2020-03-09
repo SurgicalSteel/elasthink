@@ -40,17 +40,17 @@ type ElasthinkSDK struct {
 	availableDocumentType   map[string]int
 }
 
-// InitializeSpec is the payload for initialize Elasthink SDK
+// InitializeSpec is the payload to initialize Elasthink SDK
 type InitializeSpec struct {
 	RedisConfig RedisConfig
 	SdkConfig   SdkConfig
 }
 
-// RedisConfig is the basic configuration for a redis connection
+// RedisConfig is the basic configuration to initialize a redis connection
 // Address is the address of the redis will be used, for localhost with port 6379 (default redis port), just use "localhost:6379"
-// MaxActive is the maximum of access to the redis, dafault value is 30
-// MaxIdle is the maximum idle access to the redis, default value is 10
-// Timeout is the timeout of accessing redis (in second), default value is 10
+// MaxActive is the maximum of access to the redis, example value is 30
+// MaxIdle is the maximum idle access to the redis, example value is 10
+// Timeout is the timeout of accessing redis (in second), example value is 10
 type RedisConfig struct {
 	Address   string
 	MaxActive int
@@ -58,7 +58,10 @@ type RedisConfig struct {
 	Timeout   int
 }
 
-// SdkConfig is the configuration for initialize Elasthink SDK
+// SdkConfig is the configuration to initialize Elasthink SDK
+// IsUsingStopWordsRemoval enables Elasthink to remove stop words
+// StopWordRemovalData define the stop words
+// AvailableDocumentType the document type available, for example "campaign"
 type SdkConfig struct {
 	IsUsingStopWordsRemoval bool
 	StopWordRemovalData     []string
