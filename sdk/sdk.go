@@ -31,7 +31,6 @@ import (
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 /// Variables and structures
-var redisConfig *config.RedisConfigWrap
 
 // ElasthinkSDK is the main struct of elasthink SDK, initialized using initalize function
 type ElasthinkSDK struct {
@@ -43,8 +42,16 @@ type ElasthinkSDK struct {
 
 // InitializeSpec is the payload for initialize Elasthink SDK
 type InitializeSpec struct {
-	redisConfig config.RedisConfig
+	redisConfig RedisConfig
 	sdkConfig   SdkConfig
+}
+
+//RedisConfig is the basic configuration for a redis connection
+type RedisConfig struct {
+	Address   string
+	MaxActive int
+	MaxIdle   int
+	Timeout   int
 }
 
 // SdkConfig is the configuration for initialize Elasthink SDK
