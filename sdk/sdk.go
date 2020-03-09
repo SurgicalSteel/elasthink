@@ -35,9 +35,9 @@ import (
 // ElasthinkSDK is the main struct of elasthink SDK, initialized using initalize function
 type ElasthinkSDK struct {
 	Redis                   *redis.Redis
-	IsUsingStopWordsRemoval bool
-	StopWordRemovalData     []string
-	AvailableDocumentType   map[string]int
+	isUsingStopWordsRemoval bool
+	stopWordRemovalData     []string
+	availableDocumentType   map[string]int
 }
 
 // InitializeSpec is the payload for initialize Elasthink SDK
@@ -46,7 +46,11 @@ type InitializeSpec struct {
 	SdkConfig   SdkConfig
 }
 
-//RedisConfig is the basic configuration for a redis connection
+// RedisConfig is the basic configuration for a redis connection
+// Address is the address of the redis will be used, for localhost with port 6379 (default redis port), just use "localhost:6379"
+// MaxActive is the maximum of access to the redis, dafault value is 30
+// MaxIdle is the maximum idle access to the redis, default value is 10
+// Timeout is the timeout of accessing redis (in second), default value is 10
 type RedisConfig struct {
 	Address   string
 	MaxActive int
@@ -136,9 +140,9 @@ func Initialize(initializeSpec InitializeSpec) ElasthinkSDK {
 
 	elasthinkSDK := ElasthinkSDK{
 		Redis:                   newRedis,
-		IsUsingStopWordsRemoval: initializeSpec.SdkConfig.IsUsingStopWordsRemoval,
-		StopWordRemovalData:     initializeSpec.SdkConfig.StopWordRemovalData,
-		AvailableDocumentType:   availableDocumentType,
+		isUsingStopWordsRemoval: initializeSpec.SdkConfig.IsUsingStopWordsRemoval,
+		stopWordRemovalData:     initializeSpec.SdkConfig.StopWordRemovalData,
+		availableDocumentType:   availableDocumentType,
 	}
 	return elasthinkSDK
 }
@@ -160,11 +164,11 @@ func (es *ElasthinkSDK) CreateIndex(spec CreateIndexSpec) (bool, error) {
 
 	// Tokenize document name set
 	stopword := make(map[string]int)
-	for _, k := range es.StopWordRemovalData {
+	for _, k := range es.stopWordRemovalData {
 		stopword[k] = 1
 	}
 	redis := es.Redis
-	documentNameSet := util.Tokenize(documentName, es.IsUsingStopWordsRemoval, stopword)
+	documentNameSet := util.Tokenize(documentName, es.isUsingStopWordsRemoval, stopword)
 
 	docType := documentType
 	errorExist := false
@@ -206,11 +210,11 @@ func (es *ElasthinkSDK) UpdateIndex(spec UpdateIndexSpec) (bool, error) {
 
 	// Tokenize
 	stopword := make(map[string]int)
-	for _, k := range es.StopWordRemovalData {
+	for _, k := range es.stopWordRemovalData {
 		stopword[k] = 1
 	}
-	oldDocumentNameSet := util.Tokenize(oldDocumentName, es.IsUsingStopWordsRemoval, stopword)
-	newDocumentNameSet := util.Tokenize(newDocumentName, es.IsUsingStopWordsRemoval, stopword)
+	oldDocumentNameSet := util.Tokenize(oldDocumentName, es.isUsingStopWordsRemoval, stopword)
+	newDocumentNameSet := util.Tokenize(newDocumentName, es.isUsingStopWordsRemoval, stopword)
 
 	docType := spec.DocumentType
 
@@ -275,10 +279,10 @@ func (es *ElasthinkSDK) Search(spec SearchSpec) (SearchResult, error) {
 	}
 
 	stopword := make(map[string]int)
-	for _, k := range es.StopWordRemovalData {
+	for _, k := range es.stopWordRemovalData {
 		stopword[k] = 1
 	}
-	searchTermSet := util.Tokenize(searchTerm, es.IsUsingStopWordsRemoval, stopword)
+	searchTermSet := util.Tokenize(searchTerm, es.isUsingStopWordsRemoval, stopword)
 	if len(searchTermSet) == 0 {
 		return ret, nil
 	}
@@ -319,7 +323,7 @@ func (es *ElasthinkSDK) validateCreateIndexSpec(documentID int64, documentType, 
 
 // Validate is the document type is valid or not
 func (es *ElasthinkSDK) isValidFromCustomDocumentType(documentType string) error {
-	if _, ok := es.AvailableDocumentType[documentType]; ok {
+	if _, ok := es.availableDocumentType[documentType]; ok {
 		return nil
 	}
 	return errors.New("Invalid Document Type")
