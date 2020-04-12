@@ -20,9 +20,11 @@ package module
 import (
 	"context"
 	"errors"
-	"github.com/SurgicalSteel/elasthink/entity"
 	"net/http"
 	"strings"
+
+	"github.com/SurgicalSteel/elasthink/entity"
+	"github.com/SurgicalSteel/elasthink/util"
 )
 
 //SearchRequestPayload is the universal request payload for search handlers
@@ -63,7 +65,7 @@ func Search(ctx context.Context, documentType string, requestPayload SearchReque
 		}
 	}
 
-	searchTermSet := tokenize(requestPayload.SearchTerm)
+	searchTermSet := util.Tokenize(requestPayload.SearchTerm, moduleObj.IsUsingStopwordRemoval, moduleObj.StopwordSet)
 	if len(searchTermSet) == 0 {
 		return Response{
 			StatusCode:   http.StatusOK,

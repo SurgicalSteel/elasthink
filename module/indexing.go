@@ -21,10 +21,12 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"github.com/SurgicalSteel/elasthink/entity"
 	"log"
 	"net/http"
 	"strings"
+
+	"github.com/SurgicalSteel/elasthink/entity"
+	"github.com/SurgicalSteel/elasthink/util"
 )
 
 //CreateIndexRequestPayload is the universal request payload for create index handler
@@ -60,7 +62,7 @@ func CreateIndex(ctx context.Context, documentID int64, documentType string, req
 		}
 	}
 
-	documentNameSet := tokenize(requestPayload.DocumentName)
+	documentNameSet := util.Tokenize(requestPayload.DocumentName, moduleObj.IsUsingStopwordRemoval, moduleObj.StopwordSet)
 
 	docType := getDocumentType(documentType, entity.Entity.GetDocumentTypes())
 	errorExist := false
@@ -134,8 +136,8 @@ func UpdateIndex(ctx context.Context, documentID int64, documentType string, req
 		}
 	}
 
-	oldDocumentNameSet := tokenize(requestPayload.OldDocumentName)
-	newDocumentNameSet := tokenize(requestPayload.NewDocumentName)
+	oldDocumentNameSet := util.Tokenize(requestPayload.OldDocumentName, moduleObj.IsUsingStopwordRemoval, moduleObj.StopwordSet)
+	newDocumentNameSet := util.Tokenize(requestPayload.NewDocumentName, moduleObj.IsUsingStopwordRemoval, moduleObj.StopwordSet)
 
 	docType := getDocumentType(documentType, entity.Entity.GetDocumentTypes())
 
