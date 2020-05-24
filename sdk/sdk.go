@@ -1,16 +1,4 @@
-package module
-
-import (
-	"errors"
-	"fmt"
-	"log"
-	"sort"
-	"strings"
-
-	"github.com/SurgicalSteel/elasthink/config"
-	"github.com/SurgicalSteel/elasthink/redis"
-	"github.com/SurgicalSteel/elasthink/util"
-)
+package sdk
 
 // Elasthink, An alternative to elasticsearch engine written in Go for small set of documents that uses inverted index to build the index and utilizes redis to store the indexes.
 // Copyright (C) 2020 Yuwono Bangun Nagoro (a.k.a SurgicalSteel)
@@ -29,6 +17,17 @@ import (
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
+import (
+	"errors"
+	"fmt"
+	"log"
+	"sort"
+	"strings"
+
+	"github.com/SurgicalSteel/elasthink/config"
+	"github.com/SurgicalSteel/elasthink/redis"
+	"github.com/SurgicalSteel/elasthink/util"
+)
 
 /// Variables and structures
 
