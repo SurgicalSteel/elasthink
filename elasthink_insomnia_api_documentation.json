@@ -1,1 +1,158 @@
-{"_type":"export","__export_format":4,"__export_date":"2020-01-15T09:51:48.470Z","__export_source":"insomnia.desktop.app:v7.0.5","resources":[{"_id":"req_63a264ccee134b26981a844e8e407d4c","authentication":{},"body":{"mimeType":"application/json","text":"{\n\t\"oldDocumentName\":\"Ini waktumu berlibur ke Jogja bersama Airy\",\n\t\"newDocumentName\":\"Ini Waktumu Nikmati Istimewanya Jogja\"\n}"},"created":1577971239866,"description":"Endpoint format : /internal/v1/index/{document_type}/{document_id}","headers":[{"id":"pair_efe96212192043c6a1175a923efe0011","name":"Content-Type","value":"application/json"}],"isPrivate":false,"metaSortKey":-1577971239866,"method":"PUT","modified":1579081725160,"name":"[Internal] Update Index","parameters":[],"parentId":"wrk_fcb7567f74834b80b79d2ddbb390a1e1","settingDisableRenderRequestBody":false,"settingEncodeUrl":true,"settingFollowRedirects":"global","settingRebuildPath":true,"settingSendCookies":true,"settingStoreCookies":true,"url":"0.0.0.0:9000/internal/v1/index/campaign/1672","_type":"request"},{"_id":"wrk_fcb7567f74834b80b79d2ddbb390a1e1","created":1577438488442,"description":"","modified":1577438488442,"name":"elasthink","parentId":null,"_type":"workspace"},{"_id":"req_f178e1b096634691893f4e5a5f482fdf","authentication":{},"body":{"mimeType":"application/json","text":"{\n\t\"searchTerm\":\"diskon belanja bpjs\"\n}"},"created":1577962747403,"description":"Endpoint format : /v1/search/{document_type}","headers":[{"id":"pair_b053bdbf72194a1bb80579dea9060d56","name":"Content-Type","value":"application/json"}],"isPrivate":false,"metaSortKey":-1577962747403,"method":"POST","modified":1579081823465,"name":"[App] Search Document","parameters":[],"parentId":"wrk_fcb7567f74834b80b79d2ddbb390a1e1","settingDisableRenderRequestBody":false,"settingEncodeUrl":true,"settingFollowRedirects":"global","settingRebuildPath":true,"settingSendCookies":true,"settingStoreCookies":true,"url":"0.0.0.0:9000/v1/campaign/_search","_type":"request"},{"_id":"req_585c48e4228b4b81b851df8d4beae49c","authentication":{},"body":{"mimeType":"application/json","text":"{\n\t\"documentName\":\"Ini Waktumu Puas-puasin Liburan di Bali\"\t\n}"},"created":1577958211317,"description":"Endpoint format : /internal/v1/index/{document_type}/{document_id}","headers":[{"id":"pair_ec1fdb2823684c0fb683b7d194cf23a9","name":"Content-Type","value":"application/json"}],"isPrivate":false,"metaSortKey":-1577958211317,"method":"POST","modified":1579081742492,"name":"[Internal] Create Index","parameters":[],"parentId":"wrk_fcb7567f74834b80b79d2ddbb390a1e1","settingDisableRenderRequestBody":false,"settingEncodeUrl":true,"settingFollowRedirects":"global","settingRebuildPath":true,"settingSendCookies":true,"settingStoreCookies":true,"url":"0.0.0.0:9000/internal/v1/index/campaign/1670","_type":"request"},{"_id":"req_0316eb812bf646e2b897269c71f717fa","authentication":{},"body":{},"created":1577438592434,"description":"","headers":[],"isPrivate":false,"metaSortKey":-1577438592434,"method":"GET","modified":1577438609123,"name":"PING","parameters":[],"parentId":"wrk_fcb7567f74834b80b79d2ddbb390a1e1","settingDisableRenderRequestBody":false,"settingEncodeUrl":true,"settingFollowRedirects":"global","settingRebuildPath":true,"settingSendCookies":true,"settingStoreCookies":true,"url":"0.0.0.0:9000/ping","_type":"request"},{"_id":"env_820851f722b77f704912f063740c33825b71d707","color":null,"created":1577438488774,"data":{},"dataPropertyOrder":null,"isPrivate":false,"metaSortKey":1577438488774,"modified":1577438488774,"name":"Base Environment","parentId":"wrk_fcb7567f74834b80b79d2ddbb390a1e1","_type":"environment"},{"_id":"jar_820851f722b77f704912f063740c33825b71d707","cookies":[],"created":1577438488780,"modified":1577438488780,"name":"Default Jar","parentId":"wrk_fcb7567f74834b80b79d2ddbb390a1e1","_type":"cookie_jar"}]}
+{
+	"__export_date": "2020-01-15T09:51:48.470Z",
+	"__export_format": 4,
+	"__export_source": "insomnia.desktop.app:v7.0.5",
+	"_type": "export",
+	"resources": [
+		{
+			"_id": "req_63a264ccee134b26981a844e8e407d4c",
+			"_type": "request",
+			"authentication": {},
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n\t\"oldDocumentName\":\"Ini waktumu berlibur ke Jogja bersama Airy\",\n\t\"newDocumentName\":\"Ini Waktumu Nikmati Istimewanya Jogja\"\n}"
+			},
+			"created": 1577971239866,
+			"description": "Endpoint format : /internal/v1/index/{document_type}/{document_id}",
+			"headers": [
+				{
+					"id": "pair_efe96212192043c6a1175a923efe0011",
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"isPrivate": false,
+			"metaSortKey": -1577971239866,
+			"method": "PUT",
+			"modified": 1579081725160,
+			"name": "[Internal] Update Index",
+			"parameters": [],
+			"parentId": "wrk_fcb7567f74834b80b79d2ddbb390a1e1",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingFollowRedirects": "global",
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "0.0.0.0:9000/internal/v1/index/campaign/1672"
+		},
+		{
+			"_id": "wrk_fcb7567f74834b80b79d2ddbb390a1e1",
+			"_type": "workspace",
+			"created": 1577438488442,
+			"description": "",
+			"modified": 1577438488442,
+			"name": "elasthink",
+			"parentId": null
+		},
+		{
+			"_id": "req_f178e1b096634691893f4e5a5f482fdf",
+			"_type": "request",
+			"authentication": {},
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n\t\"searchTerm\":\"diskon belanja bpjs\"\n}"
+			},
+			"created": 1577962747403,
+			"description": "Endpoint format : /v1/search/{document_type}",
+			"headers": [
+				{
+					"id": "pair_b053bdbf72194a1bb80579dea9060d56",
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"isPrivate": false,
+			"metaSortKey": -1577962747403,
+			"method": "POST",
+			"modified": 1579081823465,
+			"name": "[App] Search Document",
+			"parameters": [],
+			"parentId": "wrk_fcb7567f74834b80b79d2ddbb390a1e1",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingFollowRedirects": "global",
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "0.0.0.0:9000/v1/campaign/_search"
+		},
+		{
+			"_id": "req_585c48e4228b4b81b851df8d4beae49c",
+			"_type": "request",
+			"authentication": {},
+			"body": {
+				"mimeType": "application/json",
+				"text": "{\n\t\"documentName\":\"Ini Waktumu Puas-puasin Liburan di Bali\"\t\n}"
+			},
+			"created": 1577958211317,
+			"description": "Endpoint format : /internal/v1/index/{document_type}/{document_id}",
+			"headers": [
+				{
+					"id": "pair_ec1fdb2823684c0fb683b7d194cf23a9",
+					"name": "Content-Type",
+					"value": "application/json"
+				}
+			],
+			"isPrivate": false,
+			"metaSortKey": -1577958211317,
+			"method": "POST",
+			"modified": 1579081742492,
+			"name": "[Internal] Create Index",
+			"parameters": [],
+			"parentId": "wrk_fcb7567f74834b80b79d2ddbb390a1e1",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingFollowRedirects": "global",
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "0.0.0.0:9000/internal/v1/index/campaign/1670"
+		},
+		{
+			"_id": "req_0316eb812bf646e2b897269c71f717fa",
+			"_type": "request",
+			"authentication": {},
+			"body": {},
+			"created": 1577438592434,
+			"description": "",
+			"headers": [],
+			"isPrivate": false,
+			"metaSortKey": -1577438592434,
+			"method": "GET",
+			"modified": 1577438609123,
+			"name": "PING",
+			"parameters": [],
+			"parentId": "wrk_fcb7567f74834b80b79d2ddbb390a1e1",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingFollowRedirects": "global",
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "0.0.0.0:9000/ping"
+		},
+		{
+			"_id": "env_820851f722b77f704912f063740c33825b71d707",
+			"_type": "environment",
+			"color": null,
+			"created": 1577438488774,
+			"data": {},
+			"dataPropertyOrder": null,
+			"isPrivate": false,
+			"metaSortKey": 1577438488774,
+			"modified": 1577438488774,
+			"name": "Base Environment",
+			"parentId": "wrk_fcb7567f74834b80b79d2ddbb390a1e1"
+		},
+		{
+			"_id": "jar_820851f722b77f704912f063740c33825b71d707",
+			"_type": "cookie_jar",
+			"cookies": [],
+			"created": 1577438488780,
+			"modified": 1577438488780,
+			"name": "Default Jar",
+			"parentId": "wrk_fcb7567f74834b80b79d2ddbb390a1e1"
+		}
+	]
+}
