@@ -19,9 +19,11 @@ package module
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import (
 	"fmt"
+	"log"
+	"strings"
+
 	"github.com/SurgicalSteel/elasthink/entity"
 	"github.com/SurgicalSteel/elasthink/util"
-	"log"
 )
 
 func fetchWordIndexSets(documentType entity.DocumentType, searchTermSet map[string]int) map[string][]int64 {
@@ -40,4 +42,20 @@ func fetchWordIndexSets(documentType entity.DocumentType, searchTermSet map[stri
 	}
 
 	return result
+}
+
+func fetchKeywords(documentType entity.DocumentType, prefix string) ([]string, error) {
+	prefixKey := fmt.Sprintf("%s:%s", documentType, prefix)
+	rawKeys, err := moduleObj.Redis.KeysPrefix(prefixKey)
+	if err != nil {
+		log.Printf("[MODULE][FETCHER] Failed to get keys with prefix :%s Detail :%s\n", prefixKey, err.Error())
+		return []string{}, err
+	}
+	finalKeywords := make([]string, len(rawKeys))
+	trimPrefix := fmt.Sprintf("%s:", documentType)
+	for i := 0; i < len(rawKeys); i++ {
+		rawKey := rawKeys[i]
+		finalKeywords[i] = strings.TrimPrefix(rawKey, trimPrefix)
+	}
+	return finalKeywords, nil
 }

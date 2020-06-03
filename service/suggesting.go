@@ -1,4 +1,4 @@
-package router
+package service
 
 // Elasthink, An alternative to elasticsearch engine written in Go for small set of documents that uses inverted index to build the index and utilizes redis to store the indexes.
 // Copyright (C) 2020 Yuwono Bangun Nagoro (a.k.a SurgicalSteel)
@@ -17,16 +17,30 @@ package router
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 import (
+	"context"
+	"encoding/json"
 	"net/http"
 
-	"github.com/SurgicalSteel/elasthink/service"
+	"github.com/SurgicalSteel/elasthink/module"
+	"github.com/gorilla/mux"
 )
 
-//RegisterAppHandler register app handlers (external endpoints)
-func (rw *RouterWrap) RegisterAppHandler() {
-	subRouteV1 := rw.Router.PathPrefix("/v1").Subrouter()
+func HandleKeywordSuggestion(w http.ResponseWriter, r *http.Request) {
+	ctx := context.Background()
+	vars := mux.Vars(r)
+	documentType := vars["document_type"]
+	prefix := vars["prefix"]
 
-	subRouteV1.HandleFunc("/{document_type}/_search", service.HandleSearch).Methods(http.MethodPost)
-	subRouteV1.HandleFunc("/{document_type}/{prefix}/_suggest", service.HandleKeywordSuggestion).Methods(http.MethodGet)
+	response := module.SuggestKeywords(ctx, documentType, prefix)
+	responsePayload := constructResponsePayload(response)
+
+	responsePayloadJSON, err := json.Marshal(responsePayload)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+	w.WriteHeader(response.StatusCode)
+	w.Write(responsePayloadJSON)
 }

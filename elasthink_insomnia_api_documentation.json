@@ -1,16 +1,49 @@
 {
-	"__export_date": "2020-01-15T09:51:48.470Z",
+	"__export_date": "2020-06-03T09:20:18.333Z",
 	"__export_format": 4,
-	"__export_source": "insomnia.desktop.app:v7.0.5",
+	"__export_source": "insomnia.desktop.app:v2020.2.0",
 	"_type": "export",
 	"resources": [
+		{
+			"_id": "req_b83acdf147f449b0aacafdecc0cf2655",
+			"_type": "request",
+			"authentication": {},
+			"body": {},
+			"created": 1591174663645,
+			"description": "Endpoint format : /v1/{document_type}/{prefix_keyword}/_suggest",
+			"headers": [],
+			"isPrivate": false,
+			"metaSortKey": -1591174663645,
+			"method": "GET",
+			"modified": 1591175817346,
+			"name": "[App] Keyword Suggestion",
+			"parameters": [],
+			"parentId": "wrk_fcb7567f74834b80b79d2ddbb390a1e1",
+			"settingDisableRenderRequestBody": false,
+			"settingEncodeUrl": true,
+			"settingFollowRedirects": "global",
+			"settingRebuildPath": true,
+			"settingSendCookies": true,
+			"settingStoreCookies": true,
+			"url": "0.0.0.0:9000/v1/campaign/se/_suggest"
+		},
+		{
+			"_id": "wrk_fcb7567f74834b80b79d2ddbb390a1e1",
+			"_type": "workspace",
+			"created": 1577438488442,
+			"description": "",
+			"modified": 1577438488442,
+			"name": "elasthink",
+			"parentId": null,
+			"scope": null
+		},
 		{
 			"_id": "req_63a264ccee134b26981a844e8e407d4c",
 			"_type": "request",
 			"authentication": {},
 			"body": {
 				"mimeType": "application/json",
-				"text": "{\n\t\"oldDocumentName\":\"Ini waktumu berlibur ke Jogja bersama Airy\",\n\t\"newDocumentName\":\"Ini Waktumu Nikmati Istimewanya Jogja\"\n}"
+				"text": "{\n\t\"oldDocumentName\":\"Ini waktumu berlibur ke Jogja bersama Mantanmu\",\n\t\"newDocumentName\":\"Ini Waktumu Nikmati Istimewanya Jogja\"\n}"
 			},
 			"created": 1577971239866,
 			"description": "Endpoint format : /internal/v1/index/{document_type}/{document_id}",
@@ -24,7 +57,7 @@
 			"isPrivate": false,
 			"metaSortKey": -1577971239866,
 			"method": "PUT",
-			"modified": 1579081725160,
+			"modified": 1591174941904,
 			"name": "[Internal] Update Index",
 			"parameters": [],
 			"parentId": "wrk_fcb7567f74834b80b79d2ddbb390a1e1",
@@ -37,15 +70,6 @@
 			"url": "0.0.0.0:9000/internal/v1/index/campaign/1672"
 		},
 		{
-			"_id": "wrk_fcb7567f74834b80b79d2ddbb390a1e1",
-			"_type": "workspace",
-			"created": 1577438488442,
-			"description": "",
-			"modified": 1577438488442,
-			"name": "elasthink",
-			"parentId": null
-		},
-		{
 			"_id": "req_f178e1b096634691893f4e5a5f482fdf",
 			"_type": "request",
 			"authentication": {},
@@ -54,7 +78,7 @@
 				"text": "{\n\t\"searchTerm\":\"diskon belanja bpjs\"\n}"
 			},
 			"created": 1577962747403,
-			"description": "Endpoint format : /v1/search/{document_type}",
+			"description": "Endpoint format : /v1/{document_type}/_search",
 			"headers": [
 				{
 					"id": "pair_b053bdbf72194a1bb80579dea9060d56",
@@ -65,7 +89,7 @@
 			"isPrivate": false,
 			"metaSortKey": -1577962747403,
 			"method": "POST",
-			"modified": 1579081823465,
+			"modified": 1591175835112,
 			"name": "[App] Search Document",
 			"parameters": [],
 			"parentId": "wrk_fcb7567f74834b80b79d2ddbb390a1e1",
@@ -83,7 +107,7 @@
 			"authentication": {},
 			"body": {
 				"mimeType": "application/json",
-				"text": "{\n\t\"documentName\":\"Ini Waktumu Puas-puasin Liburan di Bali\"\t\n}"
+				"text": "{\n\t\"documentName\":\"Ini Waktumu liburan hemat bareng keluarga di Bandung\"\t\n}"
 			},
 			"created": 1577958211317,
 			"description": "Endpoint format : /internal/v1/index/{document_type}/{document_id}",
@@ -97,7 +121,7 @@
 			"isPrivate": false,
 			"metaSortKey": -1577958211317,
 			"method": "POST",
-			"modified": 1579081742492,
+			"modified": 1591175619162,
 			"name": "[Internal] Create Index",
 			"parameters": [],
 			"parentId": "wrk_fcb7567f74834b80b79d2ddbb390a1e1",
@@ -107,7 +131,7 @@
 			"settingRebuildPath": true,
 			"settingSendCookies": true,
 			"settingStoreCookies": true,
-			"url": "0.0.0.0:9000/internal/v1/index/campaign/1670"
+			"url": "0.0.0.0:9000/internal/v1/index/campaign/1672"
 		},
 		{
 			"_id": "req_0316eb812bf646e2b897269c71f717fa",
@@ -152,6 +176,16 @@
 			"created": 1577438488780,
 			"modified": 1577438488780,
 			"name": "Default Jar",
+			"parentId": "wrk_fcb7567f74834b80b79d2ddbb390a1e1"
+		},
+		{
+			"_id": "spc_8c5def0b34784e8bb10e24079a7289e9",
+			"_type": "api_spec",
+			"contentType": "yaml",
+			"contents": "",
+			"created": 1591117375667,
+			"fileName": "elasthink",
+			"modified": 1591117375667,
 			"parentId": "wrk_fcb7567f74834b80b79d2ddbb390a1e1"
 		}
 	]

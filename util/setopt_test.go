@@ -137,12 +137,12 @@ func TestWordsSetUnion(t *testing.T) {
 
 	testCases["filled setA and filled setB with no overlapping items"] = tcase{
 		sourceSetA: map[string]int{
-			"invincible": 1,
-			"means":      1,
-			"can":        1,
-			"not":        1,
-			"be":         1,
-			"seen":       1,
+			"invisible": 1,
+			"means":     1,
+			"can":       1,
+			"not":       1,
+			"be":        1,
+			"seen":      1,
 		},
 		sourceSetB: map[string]int{
 			"the":   1,
@@ -155,20 +155,20 @@ func TestWordsSetUnion(t *testing.T) {
 			"dog":   1,
 		},
 		expected: map[string]int{
-			"invincible": 1,
-			"means":      1,
-			"can":        1,
-			"not":        1,
-			"be":         1,
-			"seen":       1,
-			"the":        1,
-			"quick":      1,
-			"brown":      1,
-			"fox":        1,
-			"jumps":      1,
-			"over":       1,
-			"lazy":       1,
-			"dog":        1,
+			"invisible": 1,
+			"means":     1,
+			"can":       1,
+			"not":       1,
+			"be":        1,
+			"seen":      1,
+			"the":       1,
+			"quick":     1,
+			"brown":     1,
+			"fox":       1,
+			"jumps":     1,
+			"over":      1,
+			"lazy":      1,
+			"dog":       1,
 		},
 	}
 
@@ -266,12 +266,12 @@ func TestWordsSetSubtraction(t *testing.T) {
 
 	testCases["filled setA and filled setB with no overlapping items"] = tcase{
 		sourceSetA: map[string]int{
-			"invincible": 1,
-			"means":      1,
-			"can":        1,
-			"not":        1,
-			"be":         1,
-			"seen":       1,
+			"invisible": 1,
+			"means":     1,
+			"can":       1,
+			"not":       1,
+			"be":        1,
+			"seen":      1,
 		},
 		sourceSetB: map[string]int{
 			"the":   1,
@@ -284,12 +284,12 @@ func TestWordsSetSubtraction(t *testing.T) {
 			"dog":   1,
 		},
 		expected: map[string]int{
-			"invincible": 1,
-			"means":      1,
-			"can":        1,
-			"not":        1,
-			"be":         1,
-			"seen":       1,
+			"invisible": 1,
+			"means":     1,
+			"can":       1,
+			"not":       1,
+			"be":        1,
+			"seen":      1,
 		},
 	}
 
@@ -374,12 +374,12 @@ func TestWordsSetIntersection(t *testing.T) {
 
 	testCases["filled setA and filled setB with no overlapping items"] = tcase{
 		sourceSetA: map[string]int{
-			"invincible": 1,
-			"means":      1,
-			"can":        1,
-			"not":        1,
-			"be":         1,
-			"seen":       1,
+			"invisible": 1,
+			"means":     1,
+			"can":       1,
+			"not":       1,
+			"be":        1,
+			"seen":      1,
 		},
 		sourceSetB: map[string]int{
 			"the":   1,

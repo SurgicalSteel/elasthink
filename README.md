@@ -8,11 +8,18 @@ We use inverted index to build the index. We also utilize redis to store the ind
 
 ## Table of Contents
 
+* [Use Cases](#use_cases)
 * [Installation](#installation)
 * [Documentation](#documentation)
 * [Dependencies](#dependencies)
 * [Reference](#reference)
 * [Additional Note](#note)
+
+## Use Cases
+1. Create Index (needs `document_type`, `document_id`, and `document_name`)
+2. Update Index (needs `document_type`, `document_id`, and `document_name`)
+3. Search (needs `document_type` and `search_term`)
+4. Keyword Suggestion (needs `document_type` and `keyword_prefix`)
 
 ## Installation
 1. To install elasthink, you need to run `$ go get github.com/SurgicalSteel/elasthink`
