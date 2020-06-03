@@ -8,7 +8,7 @@ We use inverted index to build the index. We also utilize redis to store the ind
 
 ## Table of Contents
 
-* [Use Cases](#use_cases)
+* [Use Cases](#use-cases)
 * [Installation](#installation)
 * [Documentation](#documentation)
 * [Dependencies](#dependencies)
