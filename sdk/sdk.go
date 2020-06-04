@@ -20,7 +20,6 @@ package sdk
 import (
 	"errors"
 	"fmt"
-	"log"
 	"sort"
 	"strings"
 
@@ -176,6 +175,8 @@ func (es *ElasthinkSDK) CreateIndex(spec CreateIndexSpec) (bool, error) {
 	errorExist := false
 	errorKeys := ""
 
+	//add index for each tokenized items on documentNameSet
+	//if there is an error in each indexing process, construct the error keys string (to log which keys affected by the errors)
 	for k := range documentNameSet {
 		key := fmt.Sprintf("%s:%s", docType, k)
 		value := make([]interface{}, 1)
@@ -184,13 +185,14 @@ func (es *ElasthinkSDK) CreateIndex(spec CreateIndexSpec) (bool, error) {
 		if err != nil {
 			errorExist = true
 			errorKeys = errorKeys + " " + key + ","
-			log.Println("[SDK_REDIS][CREATE INDEX] failed to add index on key :", key, "and document ID:", documentID)
 			continue
 		}
 	}
 
 	if errorExist {
-		return false, err
+		errorKeys = strings.TrimRight(errorKeys, ",")
+		errorKeys = strings.TrimLeft(errorKeys, " ")
+		return false, fmt.Errorf("Error on adding following keys :%s", errorKeys)
 	}
 
 	return true, nil
@@ -232,7 +234,6 @@ func (es *ElasthinkSDK) UpdateIndex(spec UpdateIndexSpec) (bool, error) {
 		if err != nil {
 			isErrorRemoveExist = true
 			errorRemoveKeys = errorRemoveKeys + " " + key + ","
-			log.Println("[SDK_REDIS][UPDATE INDEX] failed to remove index on key :", key, "and document ID:", documentID)
 			continue
 		}
 	}
@@ -249,7 +250,6 @@ func (es *ElasthinkSDK) UpdateIndex(spec UpdateIndexSpec) (bool, error) {
 		if err != nil {
 			isErrorAddExist = true
 			errorAddKeys = errorAddKeys + " " + key + ","
-			log.Println("[SDK_REDIS][UPDATE INDEX] failed to add index on key :", key, "and document ID:", documentID)
 			continue
 		}
 	}
@@ -291,9 +291,9 @@ func (es *ElasthinkSDK) Search(spec SearchSpec) (SearchResult, error) {
 
 	docType := documentType
 
-	wordIndexSets := es.fetchWordIndexSets(docType, searchTermSet)
+	wordIndexSets, err := es.fetchWordIndexSets(docType, searchTermSet)
 
-	if len(wordIndexSets) == 0 {
+	if len(wordIndexSets) == 0 || err != nil {
 		return ret, err
 	}
 
@@ -372,22 +372,32 @@ func (es *ElasthinkSDK) validateSearchSpec(documentType, searchTerm string) erro
 }
 
 // fetchWordIndexSets
-func (es *ElasthinkSDK) fetchWordIndexSets(documentType string, searchTermSet map[string]int) map[string][]int64 {
+func (es *ElasthinkSDK) fetchWordIndexSets(documentType string, searchTermSet map[string]int) (map[string][]int64, error) {
 	result := make(map[string][]int64)
+
+	errorExist := false
+	errorKeys := ""
 
 	// set key format --> documentType:word
 	for k := range searchTermSet {
 		key := fmt.Sprintf("%s:%s", documentType, k)
 		members, err := es.Redis.SMembers(key)
 		if err != nil {
-			log.Println("[SDK_REDIS][FETCHER] Failed to get members of key :", key)
+			errorExist = true
+			errorKeys = errorKeys + " " + key + ","
 			continue
 		}
 		documentIds := util.SliceStringToInt64(members)
 		result[k] = documentIds
 	}
 
-	return result
+	if errorExist {
+		errorKeys = strings.TrimRight(errorKeys, ",")
+		errorKeys = strings.TrimLeft(errorKeys, " ")
+		return make(map[string][]int64), fmt.Errorf("Error on adding following keys :%s", errorKeys)
+	}
+
+	return result, nil
 }
 
 //rankSearchResult ranks search result (document id by its appeareance count). word indexes is a map with word as a key and slice of ids as value. Returns ordered search result rank slice.
