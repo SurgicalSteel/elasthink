@@ -3,23 +3,28 @@ elasthink
 
 [![GoDoc](https://godoc.org/github.com/SurgicalSteel/elasthink?status.png)](https://godoc.org/github.com/SurgicalSteel/elasthink)
 
-An alternative to elasticsearch engine written in Go for small set of documents that makes you think a little bit when implementing it.
-We use inverted index to build the index. We also utilize redis to store the indexes.
+An alternative to elasticsearch engine written in Go for small set of documents that uses inverted index to build the index and utilizes redis to store the indexes.
 
 ## Table of Contents
 
 * [Use Cases](#use-cases)
+* [Elasthink SDK](#elasthink-sdk)
 * [Installation](#installation)
 * [Documentation](#documentation)
 * [Dependencies](#dependencies)
 * [Reference](#reference)
-* [Additional Note](#note)
+* [Additional Note](#additional-note)
 
 ## Use Cases
-1. Create Index (needs `document_type`, `document_id`, and `document_name`)
-2. Update Index (needs `document_type`, `document_id`, and `document_name`)
-3. Search (needs `document_type` and `search_term`)
-4. Keyword Suggestion (needs `document_type` and `keyword_prefix`)
+1. Create Index for a document (needs `document_type`, `document_id`, and `document_name`)
+2. Update Index of a document (needs `document_type`, `document_id`, and `document_name`)
+3. Search document_id by document name using search term (needs `document_type` and `search_term`)
+4. Keyword Suggestion by prefix (needs `document_type` and `keyword_prefix`)
+
+## Elasthink SDK
+Coming Soon!  
+With the SDK, you can run all the core functionality of elasthink from your go service by providing a redis connection and without setting up a dedicated elasthink server.  
+Currently, the SDK is on preparation for the release. So stay tuned to get the latest update.  
 
 ## Installation
 1. To install elasthink, you need to run `$ go get github.com/SurgicalSteel/elasthink`
@@ -47,6 +52,6 @@ For code documentation, we use standard godoc as our code documentation tool. To
 ## Reference
 [E-Book Redis in Action Part 2 Chapter 7](https://redislabs.com/ebook/part-2-core-concepts/chapter-7-search-based-applications/7-1-searching-in-redis/7-1-1-basic-search-theory/)
 
-## Note
+## Additional Note
 Currently, elasthink supports stopwords removal option when doing tokenization for document name and search term.
 But, for now we only support stopwords removal for bahasa Indonesia (Indonesian).
