@@ -100,6 +100,12 @@ type SearchResultRankData struct {
 	Rank      int
 }
 
+// GetKeywordSuggestionSpec is the spec of Getting Keyword Suggestion function
+type GetKeywordSuggestionSpec struct {
+	DocumentType string
+	Prefix       string
+}
+
 // SearchResult is the result of Search, it have array of search result datum
 type SearchResult struct {
 	RankedResultList RankByShowCount
@@ -289,10 +295,7 @@ func (es *ElasthinkSDK) Search(spec SearchSpec) (SearchResult, error) {
 		return ret, nil
 	}
 
-	docType := documentType
-
-	wordIndexSets, err := es.fetchWordIndexSets(docType, searchTermSet)
-
+	wordIndexSets, err := es.fetchWordIndexSets(documentType, searchTermSet)
 	if len(wordIndexSets) == 0 || err != nil {
 		return ret, err
 	}
@@ -301,6 +304,26 @@ func (es *ElasthinkSDK) Search(spec SearchSpec) (SearchResult, error) {
 	ret.RankedResultList = rankedSearchResult
 
 	return ret, nil
+}
+
+//GetKeywordSuggestion is the core function to get keyword suggestion from a given keyword prefix and document type
+func (es *ElasthinkSDK) GetKeywordSuggestion(spec GetKeywordSuggestionSpec) ([]string, error) {
+	err := es.validateGetKeywordSuggestionSpec(spec.DocumentType, spec.Prefix)
+	if err != nil {
+		return []string{}, err
+	}
+
+	prefix := strings.ToLower(spec.Prefix)
+	documentType := spec.DocumentType
+
+	keywords, err := es.fetchKeywords(documentType, prefix)
+	if err != nil {
+		return []string{}, err
+	}
+
+	sort.Strings(keywords)
+	return keywords, nil
+
 }
 
 /// Private Functions
@@ -357,6 +380,24 @@ func (es *ElasthinkSDK) validateUpdateIndexSpec(documentID int64, documentType, 
 func (es *ElasthinkSDK) validateSearchSpec(documentType, searchTerm string) error {
 	if len(strings.Trim(searchTerm, " ")) == 0 {
 		return errors.New("Search Term is required")
+	}
+
+	if len(strings.Trim(documentType, " ")) == 0 {
+		return errors.New("Document Type is required")
+	}
+
+	err := es.isValidFromCustomDocumentType(documentType)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+// validateGetKeywordSuggestionSpec validate search spec
+func (es *ElasthinkSDK) validateGetKeywordSuggestionSpec(documentType, prefix string) error {
+	if len(strings.Trim(prefix, " ")) == 0 {
+		return errors.New("prefix of a keyword is required")
 	}
 
 	if len(strings.Trim(documentType, " ")) == 0 {
@@ -435,4 +476,23 @@ func rankSearchResult(wordIndexes map[string][]int64) []SearchResultRankData {
 	}
 
 	return result
+}
+
+//fetchKeywords to fetch suggested keywords by prefix
+func (es *ElasthinkSDK) fetchKeywords(documentType, prefix string) ([]string, error) {
+	prefixKey := fmt.Sprintf("%s:%s", documentType, prefix)
+	rawKeys, err := es.Redis.KeysPrefix(prefixKey)
+	if err != nil {
+		return []string{}, err
+	}
+
+	finalKeywords := make([]string, len(rawKeys))
+	trimPrefix := fmt.Sprintf("%s:", documentType)
+
+	for i := 0; i < len(rawKeys); i++ {
+		rawKey := rawKeys[i]
+		finalKeywords[i] = strings.TrimPrefix(rawKey, trimPrefix)
+	}
+
+	return finalKeywords, nil
 }
