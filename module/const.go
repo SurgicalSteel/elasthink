@@ -17,4 +17,6 @@ package module
 //
 // You should have received a copy of the GNU General Public License
 // along with this program.  If not, see <https://www.gnu.org/licenses/>.
-import ()
+
+const elasthinkInvertedIndexPrefix string = "elasthink:inverted:"
+const elasthinkNormalIndexPrefix string = "elasthink:normal:"

@@ -69,7 +69,7 @@ func CreateIndex(ctx context.Context, documentID int64, documentType string, req
 	errorKeys := ""
 
 	for k, _ := range documentNameSet {
-		key := fmt.Sprintf("%s:%s", docType, k)
+		key := fmt.Sprintf("%s%s:%s", elasthinkInvertedIndexPrefix, docType, k)
 		value := make([]interface{}, 1)
 		value[0] = fmt.Sprintf("%d", documentID)
 		_, err = moduleObj.Redis.SAdd(key, value)
@@ -146,7 +146,7 @@ func UpdateIndex(ctx context.Context, documentID int64, documentType string, req
 	errorRemoveKeys := ""
 
 	for k, _ := range oldDocumentNameSet {
-		key := fmt.Sprintf("%s:%s", docType, k)
+		key := fmt.Sprintf("%s%s:%s", elasthinkInvertedIndexPrefix, docType, k)
 		value := make([]interface{}, 1)
 		value[0] = fmt.Sprintf("%d", documentID)
 		_, err = moduleObj.Redis.SRem(key, value)
@@ -163,7 +163,7 @@ func UpdateIndex(ctx context.Context, documentID int64, documentType string, req
 	errorAddKeys := ""
 
 	for k, _ := range newDocumentNameSet {
-		key := fmt.Sprintf("%s:%s", docType, k)
+		key := fmt.Sprintf("%s%s:%s", elasthinkInvertedIndexPrefix, docType, k)
 		value := make([]interface{}, 1)
 		value[0] = fmt.Sprintf("%d", documentID)
 		_, err = moduleObj.Redis.SAdd(key, value)
