@@ -1,3 +1,4 @@
+//package sdk provides the elasthink SDK which allows you to run all elasthink's core functionality in your service
 package sdk
 
 // Elasthink, An alternative to elasticsearch engine written in Go for small set of documents that uses inverted index to build the index and utilizes redis to store the indexes.

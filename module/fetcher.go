@@ -30,7 +30,7 @@ func fetchWordIndexSets(documentType entity.DocumentType, searchTermSet map[stri
 	result := make(map[string][]int64)
 
 	// set key format --> elasthink:inverted:documentType:word
-	for k, _ := range searchTermSet {
+	for k := range searchTermSet {
 		key := fmt.Sprintf("%s%s:%s", elasthinkInvertedIndexPrefix, documentType, k)
 		members, err := moduleObj.Redis.SMembers(key)
 		if err != nil {
@@ -52,7 +52,7 @@ func fetchKeywords(documentType entity.DocumentType, prefix string) ([]string, e
 		return []string{}, err
 	}
 	finalKeywords := make([]string, len(rawKeys))
-	trimPrefix := fmt.Sprintf("%s:", documentType)
+	trimPrefix := fmt.Sprintf("%s%s:", elasthinkInvertedIndexPrefix, documentType)
 	for i := 0; i < len(rawKeys); i++ {
 		rawKey := rawKeys[i]
 		finalKeywords[i] = strings.TrimPrefix(rawKey, trimPrefix)

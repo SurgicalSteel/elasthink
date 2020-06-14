@@ -68,7 +68,7 @@ func CreateIndex(ctx context.Context, documentID int64, documentType string, req
 	errorExist := false
 	errorKeys := ""
 
-	for k, _ := range documentNameSet {
+	for k := range documentNameSet {
 		key := fmt.Sprintf("%s%s:%s", elasthinkInvertedIndexPrefix, docType, k)
 		value := make([]interface{}, 1)
 		value[0] = fmt.Sprintf("%d", documentID)
@@ -89,13 +89,13 @@ func CreateIndex(ctx context.Context, documentID int64, documentType string, req
 			ErrorMessage: fmt.Sprintf("Error on adding following keys :%s", errorKeys),
 			Data:         nil,
 		}
-	} else {
-		return Response{
-			StatusCode:   http.StatusOK,
-			ErrorMessage: "",
-			Data:         nil,
-		}
 	}
+	return Response{
+		StatusCode:   http.StatusOK,
+		ErrorMessage: "",
+		Data:         nil,
+	}
+
 }
 
 //UpdateIndexRequestPayload is the universal request payload for update index handler
@@ -145,7 +145,7 @@ func UpdateIndex(ctx context.Context, documentID int64, documentType string, req
 	isErrorRemoveExist := false
 	errorRemoveKeys := ""
 
-	for k, _ := range oldDocumentNameSet {
+	for k := range oldDocumentNameSet {
 		key := fmt.Sprintf("%s%s:%s", elasthinkInvertedIndexPrefix, docType, k)
 		value := make([]interface{}, 1)
 		value[0] = fmt.Sprintf("%d", documentID)
@@ -162,7 +162,7 @@ func UpdateIndex(ctx context.Context, documentID int64, documentType string, req
 	isErrorAddExist := false
 	errorAddKeys := ""
 
-	for k, _ := range newDocumentNameSet {
+	for k := range newDocumentNameSet {
 		key := fmt.Sprintf("%s%s:%s", elasthinkInvertedIndexPrefix, docType, k)
 		value := make([]interface{}, 1)
 		value[0] = fmt.Sprintf("%d", documentID)
