@@ -28,6 +28,13 @@ import (
 	"github.com/SurgicalSteel/elasthink/util"
 )
 
+/// Const
+//elasthinkInvertedIndexPrefix is the prefix key for each word set in the inverted index
+const elasthinkInvertedIndexPrefix string = "elasthink:inverted:"
+
+//elasthinkNormalIndexPrefix is the prefix key for each normal index (followed by document type and document id). The value with this key contains the original document name
+const elasthinkNormalIndexPrefix string = "elasthink:normal:"
+
 /// Variables and structures
 
 // ElasthinkSDK is the main struct of elasthink SDK, initialized using initalize function
@@ -184,7 +191,7 @@ func (es *ElasthinkSDK) CreateIndex(spec CreateIndexSpec) (bool, error) {
 	//add index for each tokenized items on documentNameSet
 	//if there is an error in each indexing process, construct the error keys string (to log which keys affected by the errors)
 	for k := range documentNameSet {
-		key := fmt.Sprintf("%s:%s", docType, k)
+		key := fmt.Sprintf("%s%s:%s", elasthinkInvertedIndexPrefix, docType, k)
 		value := make([]interface{}, 1)
 		value[0] = fmt.Sprintf("%d", documentID)
 		_, err := redis.SAdd(key, value)
@@ -233,7 +240,7 @@ func (es *ElasthinkSDK) UpdateIndex(spec UpdateIndexSpec) (bool, error) {
 	errorRemoveKeys := ""
 
 	for k := range oldDocumentNameSet {
-		key := fmt.Sprintf("%s:%s", docType, k)
+		key := fmt.Sprintf("%s%s:%s", elasthinkInvertedIndexPrefix, docType, k)
 		value := make([]interface{}, 1)
 		value[0] = fmt.Sprintf("%d", documentID)
 		_, err = redis.SRem(key, value)
@@ -249,7 +256,7 @@ func (es *ElasthinkSDK) UpdateIndex(spec UpdateIndexSpec) (bool, error) {
 	errorAddKeys := ""
 
 	for k := range newDocumentNameSet {
-		key := fmt.Sprintf("%s:%s", docType, k)
+		key := fmt.Sprintf("%s%s:%s", elasthinkInvertedIndexPrefix, docType, k)
 		value := make([]interface{}, 1)
 		value[0] = fmt.Sprintf("%d", documentID)
 		_, err = redis.SAdd(key, value)
@@ -330,11 +337,6 @@ func (es *ElasthinkSDK) GetKeywordSuggestion(spec GetKeywordSuggestionSpec) ([]s
 
 // validateCreateIndexSpec validates create index spec
 func (es *ElasthinkSDK) validateCreateIndexSpec(documentID int64, documentType, documentName string) error {
-	err := es.isValidFromCustomDocumentType(documentType)
-	if err != nil {
-		return err
-	}
-
 	if documentID <= 0 {
 		return errors.New("Invalid Document ID")
 	}
@@ -343,7 +345,8 @@ func (es *ElasthinkSDK) validateCreateIndexSpec(documentID int64, documentType, 
 		return errors.New("Document Name must not be empty")
 	}
 
-	return nil
+	err := es.isValidFromCustomDocumentType(documentType)
+	return err
 }
 
 // Validate is the document type is valid or not
@@ -356,11 +359,6 @@ func (es *ElasthinkSDK) isValidFromCustomDocumentType(documentType string) error
 
 // validateUpdateIndexSpec validate update index spec
 func (es *ElasthinkSDK) validateUpdateIndexSpec(documentID int64, documentType, oldDocumentName, newDocumentName string) error {
-	err := es.isValidFromCustomDocumentType(documentType)
-	if err != nil {
-		return err
-	}
-
 	if documentID <= 0 {
 		return errors.New("Invalid Document ID")
 	}
@@ -373,7 +371,8 @@ func (es *ElasthinkSDK) validateUpdateIndexSpec(documentID int64, documentType, 
 		return errors.New("Document Name must not be empty")
 	}
 
-	return nil
+	err := es.isValidFromCustomDocumentType(documentType)
+	return err
 }
 
 // validateSearchSpec validate search spec
@@ -387,11 +386,7 @@ func (es *ElasthinkSDK) validateSearchSpec(documentType, searchTerm string) erro
 	}
 
 	err := es.isValidFromCustomDocumentType(documentType)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 // validateGetKeywordSuggestionSpec validate search spec
@@ -405,11 +400,7 @@ func (es *ElasthinkSDK) validateGetKeywordSuggestionSpec(documentType, prefix st
 	}
 
 	err := es.isValidFromCustomDocumentType(documentType)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return err
 }
 
 // fetchWordIndexSets
@@ -419,9 +410,9 @@ func (es *ElasthinkSDK) fetchWordIndexSets(documentType string, searchTermSet ma
 	errorExist := false
 	errorKeys := ""
 
-	// set key format --> documentType:word
+	// set key format --> elasthink:inverted:documentType:word
 	for k := range searchTermSet {
-		key := fmt.Sprintf("%s:%s", documentType, k)
+		key := fmt.Sprintf("%s%s:%s", elasthinkInvertedIndexPrefix, documentType, k)
 		members, err := es.Redis.SMembers(key)
 		if err != nil {
 			errorExist = true
@@ -480,14 +471,14 @@ func rankSearchResult(wordIndexes map[string][]int64) []SearchResultRankData {
 
 //fetchKeywords to fetch suggested keywords by prefix
 func (es *ElasthinkSDK) fetchKeywords(documentType, prefix string) ([]string, error) {
-	prefixKey := fmt.Sprintf("%s:%s", documentType, prefix)
+	prefixKey := fmt.Sprintf("%s%s:%s", elasthinkInvertedIndexPrefix, documentType, prefix)
 	rawKeys, err := es.Redis.KeysPrefix(prefixKey)
 	if err != nil {
 		return []string{}, err
 	}
 
 	finalKeywords := make([]string, len(rawKeys))
-	trimPrefix := fmt.Sprintf("%s:", documentType)
+	trimPrefix := fmt.Sprintf("%s%s:", elasthinkInvertedIndexPrefix, documentType)
 
 	for i := 0; i < len(rawKeys); i++ {
 		rawKey := rawKeys[i]
